@@ -25,10 +25,13 @@ INSERT INTO subcategorias (id, categoria_id, nome, descricao, status, created_at
     (5, 5, 'Frutas', 'Frutas vendidas por unidade ou peso', 'ativa', '2026-04-10 08:12:00', '2026-04-10 08:12:00', NULL),
     (6, 6, 'Leites', 'Leites e bebidas lacteas', 'ativa', '2026-04-10 08:12:00', '2026-04-10 08:12:00', NULL);
 
-INSERT INTO clientes (id, nome, cpf_cnpj, email, telefone, data_nascimento, limite_credito, observacoes, status, created_at, updated_at, deleted_at) VALUES
-    (1, 'Maria Souza', '12345678901', 'maria.souza@email.com', '65992110001', '1988-03-11', 500.00, 'Cliente frequente do bairro', 'ativo', '2026-04-10 08:15:00', '2026-04-14 09:20:00', NULL),
-    (2, 'Joao Pereira', '98765432100', 'joao.pereira@email.com', '65992110002', '1979-09-22', 300.00, 'Utiliza fiado com pagamento semanal', 'ativo', '2026-04-10 08:16:00', '2026-04-15 09:20:00', NULL),
-    (3, 'Ana Clara Lima', '55544433322', 'ana.clara@email.com', '65992110003', '1995-01-05', 200.00, 'Cliente que costuma fazer encomendas', 'ativo', '2026-04-10 08:17:00', '2026-04-10 08:17:00', NULL);
+INSERT INTO clientes (
+    id, nome, tipo_pessoa, cpf_cnpj, email, telefone, data_nascimento, endereco, bairro, cidade, estado, cep,
+    limite_fiado, observacoes, status, created_at, updated_at, deleted_at
+) VALUES
+    (1, 'Maria Souza', 'fisica', '12345678901', 'maria.souza@email.com', '65992110001', '1988-03-11', 'Rua das Flores, 120', 'Centro Norte', 'Cuiaba', 'MT', '78000001', 500.00, 'Cliente frequente do bairro', 'ativo', '2026-04-10 08:15:00', '2026-04-14 09:20:00', NULL),
+    (2, 'Joao Pereira', 'fisica', '98765432100', 'joao.pereira@email.com', '65992110002', '1979-09-22', 'Av. Principal, 455', 'Jardim Primavera', 'Cuiaba', 'MT', '78000002', 300.00, 'Utiliza fiado com pagamento semanal', 'ativo', '2026-04-10 08:16:00', '2026-04-15 09:20:00', NULL),
+    (3, 'Ana Clara Lima', 'fisica', '55544433322', 'ana.clara@email.com', '65992110003', '1995-01-05', 'Rua do Mercado, 89', 'Boa Esperanca', 'Varzea Grande', 'MT', '78110010', 200.00, 'Cliente que costuma fazer encomendas', 'ativo', '2026-04-10 08:17:00', '2026-04-10 08:17:00', NULL);
 
 INSERT INTO fornecedores (id, razao_social, nome_fantasia, cnpj, email, telefone, contato, endereco, observacoes, status, created_at, updated_at, deleted_at) VALUES
     (1, 'Alimentos Bom Campo LTDA', 'Bom Campo Distribuidora', '11222333000101', 'contato@bomcampo.com', '6533211001', 'Carlos Mendes', 'Av. das Industrias, 1000', 'Fornecedor principal de mercearia', 'ativo', '2026-04-10 08:20:00', '2026-04-10 08:20:00', NULL),

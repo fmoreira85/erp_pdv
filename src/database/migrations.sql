@@ -72,11 +72,17 @@ CREATE TABLE subcategorias (
 CREATE TABLE clientes (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     nome VARCHAR(120) NOT NULL,
+    tipo_pessoa ENUM('fisica', 'juridica') NOT NULL DEFAULT 'fisica',
     cpf_cnpj VARCHAR(20) NULL,
     email VARCHAR(120) NULL,
     telefone VARCHAR(20) NULL,
     data_nascimento DATE NULL,
-    limite_credito DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    endereco VARCHAR(255) NULL,
+    bairro VARCHAR(120) NULL,
+    cidade VARCHAR(120) NULL,
+    estado CHAR(2) NULL,
+    cep VARCHAR(10) NULL,
+    limite_fiado DECIMAL(12,2) NOT NULL DEFAULT 0.00,
     observacoes TEXT NULL,
     status ENUM('ativo', 'inativo') NOT NULL DEFAULT 'ativo',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -85,7 +91,8 @@ CREATE TABLE clientes (
     PRIMARY KEY (id),
     UNIQUE KEY uk_clientes_cpf_cnpj (cpf_cnpj),
     KEY idx_clientes_nome (nome),
-    KEY idx_clientes_status (status)
+    KEY idx_clientes_status (status),
+    KEY idx_clientes_tipo_pessoa (tipo_pessoa)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE fornecedores (

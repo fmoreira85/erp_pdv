@@ -17,6 +17,7 @@ const PROFILE_PERMISSIONS = {
   },
   funcionario_pdv: {
     home: ["view"],
+    clientes: ["view"],
     pdv: ["view", "create"],
     caixa: ["view", "open", "close"],
   },
