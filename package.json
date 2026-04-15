@@ -1,0 +1,26 @@
+{
+  "name": "erp-pdv-backend",
+  "version": "1.0.0",
+  "description": "Base backend para CRM + PDV + Admin de supermercado",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "express",
+    "mysql2",
+    "pdv",
+    "crm",
+    "erp"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.14.1"
+  }
+}

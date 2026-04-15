@@ -1,0 +1,156 @@
+.app-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: var(--app-sidebar-width) 1fr;
+}
+
+.app-sidebar {
+  padding: 2rem 1.25rem;
+  background:
+    linear-gradient(180deg, rgba(36, 92, 71, 0.96), rgba(22, 53, 42, 1)),
+    var(--app-sidebar);
+  color: #f4f0e5;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.app-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.app-header {
+  padding: 1.5rem 2rem 0;
+}
+
+.app-content {
+  padding: 1.5rem 2rem 2rem;
+}
+
+.app-body .btn-success {
+  background: linear-gradient(135deg, #1c7c54, #2aa56d);
+  border-color: #1c7c54;
+}
+
+.page-loading {
+  min-height: 65vh;
+  display: grid;
+  place-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.page-loading__text {
+  color: var(--app-text-muted);
+  margin: 0;
+}
+
+.topbar-heading,
+.topbar-actions,
+.app-header {
+  display: flex;
+  align-items: center;
+}
+
+.app-header {
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.topbar-heading {
+  gap: 1rem;
+}
+
+.topbar-heading__eyebrow {
+  display: block;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  color: var(--app-text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.topbar-heading__title {
+  margin: 0;
+  font-size: clamp(1.6rem, 2vw, 2.2rem);
+}
+
+.topbar-actions {
+  gap: 0.75rem;
+}
+
+.app-menu-button {
+  display: none;
+  border-radius: 999px;
+}
+
+.status-pill,
+.user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0.6rem 0.95rem;
+}
+
+.status-pill {
+  background: rgba(28, 124, 84, 0.1);
+  color: #175740;
+  font-size: 0.92rem;
+}
+
+.status-pill--neutral {
+  background: rgba(29, 37, 33, 0.08);
+  color: var(--app-text-muted);
+}
+
+.user-chip {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  box-shadow: var(--app-shadow);
+}
+
+.user-chip__name {
+  font-weight: 800;
+}
+
+.user-chip__role {
+  color: var(--app-text-muted);
+  text-transform: capitalize;
+}
+
+@media (max-width: 991px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .app-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(86vw, 320px);
+    transform: translateX(-100%);
+    transition: transform 200ms ease;
+    z-index: 30;
+  }
+
+  .app-shell.is-sidebar-open .app-sidebar {
+    transform: translateX(0);
+  }
+
+  .app-header,
+  .app-content {
+    padding-inline: 1rem;
+  }
+
+  .app-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .app-menu-button {
+    display: inline-flex;
+  }
+}
