@@ -31,7 +31,7 @@ const PROFILE_PERMISSIONS = {
   },
   funcionario_compras: {
     home: ["view"],
-    fornecedores: ["view", "create", "update"],
+    fornecedores: ["view", "create", "update", "delete"],
     encomendas: ["view", "create", "update"],
   },
 };

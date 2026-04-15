@@ -99,21 +99,29 @@ CREATE TABLE fornecedores (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     razao_social VARCHAR(150) NOT NULL,
     nome_fantasia VARCHAR(150) NULL,
-    cnpj VARCHAR(20) NULL,
+    tipo_pessoa ENUM('fisica', 'juridica') NOT NULL DEFAULT 'juridica',
+    cpf_cnpj VARCHAR(20) NULL,
     email VARCHAR(120) NULL,
     telefone VARCHAR(20) NULL,
-    contato VARCHAR(120) NULL,
+    celular VARCHAR(20) NULL,
+    contato_responsavel VARCHAR(120) NULL,
     endereco VARCHAR(255) NULL,
+    bairro VARCHAR(120) NULL,
+    cidade VARCHAR(120) NULL,
+    estado CHAR(2) NULL,
+    cep VARCHAR(10) NULL,
     observacoes TEXT NULL,
     status ENUM('ativo', 'inativo') NOT NULL DEFAULT 'ativo',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at DATETIME NULL,
     PRIMARY KEY (id),
-    UNIQUE KEY uk_fornecedores_cnpj (cnpj),
+    UNIQUE KEY uk_fornecedores_cpf_cnpj (cpf_cnpj),
     KEY idx_fornecedores_razao_social (razao_social),
     KEY idx_fornecedores_nome_fantasia (nome_fantasia),
-    KEY idx_fornecedores_status (status)
+    KEY idx_fornecedores_status (status),
+    KEY idx_fornecedores_tipo_pessoa (tipo_pessoa),
+    KEY idx_fornecedores_cidade_estado (cidade, estado)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE formas_pagamento (

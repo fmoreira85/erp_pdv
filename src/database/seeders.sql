@@ -33,11 +33,14 @@ INSERT INTO clientes (
     (2, 'Joao Pereira', 'fisica', '98765432100', 'joao.pereira@email.com', '65992110002', '1979-09-22', 'Av. Principal, 455', 'Jardim Primavera', 'Cuiaba', 'MT', '78000002', 300.00, 'Utiliza fiado com pagamento semanal', 'ativo', '2026-04-10 08:16:00', '2026-04-15 09:20:00', NULL),
     (3, 'Ana Clara Lima', 'fisica', '55544433322', 'ana.clara@email.com', '65992110003', '1995-01-05', 'Rua do Mercado, 89', 'Boa Esperanca', 'Varzea Grande', 'MT', '78110010', 200.00, 'Cliente que costuma fazer encomendas', 'ativo', '2026-04-10 08:17:00', '2026-04-10 08:17:00', NULL);
 
-INSERT INTO fornecedores (id, razao_social, nome_fantasia, cnpj, email, telefone, contato, endereco, observacoes, status, created_at, updated_at, deleted_at) VALUES
-    (1, 'Alimentos Bom Campo LTDA', 'Bom Campo Distribuidora', '11222333000101', 'contato@bomcampo.com', '6533211001', 'Carlos Mendes', 'Av. das Industrias, 1000', 'Fornecedor principal de mercearia', 'ativo', '2026-04-10 08:20:00', '2026-04-10 08:20:00', NULL),
-    (2, 'Bebidas Centro Oeste LTDA', 'Centro Oeste Bebidas', '22333444000102', 'vendas@co-bebidas.com', '6533211002', 'Fernanda Alves', 'Rua das Bebidas, 250', 'Fornecedor de refrigerantes e agua', 'ativo', '2026-04-10 08:21:00', '2026-04-10 08:21:00', NULL),
-    (3, 'Distribuidora Casa Limpa LTDA', 'Casa Limpa', '33444555000103', 'pedidos@casalimpa.com', '6533211003', 'Roberto Silva', 'Rua dos Atacadistas, 77', 'Fornecedor de limpeza e utilidades', 'ativo', '2026-04-10 08:22:00', '2026-04-10 08:22:00', NULL),
-    (4, 'Padaria Central Insumos LTDA', 'Central Insumos', '44555666000104', 'comercial@centralinsumos.com', '6533211004', 'Patricia Costa', 'Av. do Trigo, 455', 'Fornecedor de insumos de padaria e frutas selecionadas', 'ativo', '2026-04-10 08:23:00', '2026-04-10 08:23:00', NULL);
+INSERT INTO fornecedores (
+    id, razao_social, nome_fantasia, tipo_pessoa, cpf_cnpj, email, telefone, celular, contato_responsavel,
+    endereco, bairro, cidade, estado, cep, observacoes, status, created_at, updated_at, deleted_at
+) VALUES
+    (1, 'Alimentos Bom Campo LTDA', 'Bom Campo Distribuidora', 'juridica', '11222333000101', 'contato@bomcampo.com', '6533211001', '65999980001', 'Carlos Mendes', 'Av. das Industrias, 1000', 'Distrito Industrial', 'Cuiaba', 'MT', '78001000', 'Fornecedor principal de mercearia', 'ativo', '2026-04-10 08:20:00', '2026-04-10 08:20:00', NULL),
+    (2, 'Bebidas Centro Oeste LTDA', 'Centro Oeste Bebidas', 'juridica', '22333444000102', 'vendas@co-bebidas.com', '6533211002', '65999980002', 'Fernanda Alves', 'Rua das Bebidas, 250', 'Centro Sul', 'Cuiaba', 'MT', '78002000', 'Fornecedor de refrigerantes e agua', 'ativo', '2026-04-10 08:21:00', '2026-04-10 08:21:00', NULL),
+    (3, 'Distribuidora Casa Limpa LTDA', 'Casa Limpa', 'juridica', '33444555000103', 'pedidos@casalimpa.com', '6533211003', '65999980003', 'Roberto Silva', 'Rua dos Atacadistas, 77', 'Mapim', 'Varzea Grande', 'MT', '78115000', 'Fornecedor de limpeza e utilidades', 'ativo', '2026-04-10 08:22:00', '2026-04-10 08:22:00', NULL),
+    (4, 'Padaria Central Insumos LTDA', 'Central Insumos', 'juridica', '44555666000104', 'comercial@centralinsumos.com', '6533211004', '65999980004', 'Patricia Costa', 'Av. do Trigo, 455', 'Nova Esperanca', 'Cuiaba', 'MT', '78003000', 'Fornecedor de insumos de padaria e frutas selecionadas', 'ativo', '2026-04-10 08:23:00', '2026-04-10 08:23:00', NULL);
 
 INSERT INTO formas_pagamento (id, nome, descricao, aceita_troco, gera_conta_receber, ativo, created_at, updated_at) VALUES
     (1, 'Dinheiro', 'Pagamento em especie', 1, 0, 1, '2026-04-10 08:25:00', '2026-04-10 08:25:00'),
