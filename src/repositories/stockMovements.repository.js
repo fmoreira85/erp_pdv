@@ -200,6 +200,20 @@ async function updateStockBalance(executor, productId, nextBalance, lastCost) {
   return result.affectedRows;
 }
 
+async function updateProductCurrentCost(executor, productId, currentCost) {
+  const sql = `
+    UPDATE produtos
+    SET
+      preco_custo_atual = ?,
+      updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+      AND deleted_at IS NULL
+  `;
+
+  const result = await runQuery(executor, sql, [currentCost, productId]);
+  return result.affectedRows;
+}
+
 async function insertStockMovement(executor, payload) {
   const sql = `
     INSERT INTO movimentacoes_estoque (
@@ -340,6 +354,7 @@ module.exports = {
   findStockByProductIdForUpdate,
   createStockRecord,
   updateStockBalance,
+  updateProductCurrentCost,
   insertStockMovement,
   findProductForStockMovement,
   findUserForStockMovement,

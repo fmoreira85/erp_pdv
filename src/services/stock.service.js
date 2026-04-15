@@ -11,7 +11,14 @@ const {
   findUserForStockMovement,
   insertStockMovement,
   updateStockBalance,
+  updateProductCurrentCost,
 } = require("../repositories/stockMovements.repository");
+const {
+  reasonRequiresJustification,
+  reasonRequiresReference,
+  reasonRequiresSupplier,
+  shouldBlockNegativeStock,
+} = require("../utils/stockRules");
 
 const MOVEMENT_DEFINITIONS = {
   compra: { type: "entrada", dbType: "entrada_compra", defaultOrigin: "compra" },
@@ -174,6 +181,20 @@ async function ensureReferenceIsValid({ referenciaTipo, referenciaId, productId,
   throw new HttpError("referencia_tipo invalido", 400);
 }
 
+function ensureMovementBusinessRules({ reason, supplierId, referenciaTipo, referenciaId, observacao, motivoDetalhado }) {
+  if (reasonRequiresSupplier(reason) && !supplierId) {
+    throw new HttpError("Fornecedor e obrigatorio para esta movimentacao", 400);
+  }
+
+  if (reasonRequiresReference(reason) && (!referenciaTipo || !referenciaId)) {
+    throw new HttpError("Esta movimentacao exige referencia vinculada para rastreabilidade", 400);
+  }
+
+  if (reasonRequiresJustification(reason) && !motivoDetalhado && !observacao) {
+    throw new HttpError("Informe uma justificativa para esta movimentacao de estoque", 400);
+  }
+}
+
 async function applyStockMovement(input) {
   const definition = resolveMovementDefinition(input.tipo, input.motivo);
   const productId = Number(input.produto_id);
@@ -207,9 +228,14 @@ async function applyStockMovement(input) {
   const documentoReferencia = normalizeOptionalText(input.documento_referencia);
   const referenceFields = buildReferenceFields(input.referencia_tipo, referenceId);
 
-  if (input.motivo === "devolucao_fornecedor" && !supplierId) {
-    throw new HttpError("Fornecedor e obrigatorio para devolucao ao fornecedor", 400);
-  }
+  ensureMovementBusinessRules({
+    reason: input.motivo,
+    supplierId,
+    referenciaTipo: input.referencia_tipo,
+    referenciaId: referenceId,
+    observacao,
+    motivoDetalhado,
+  });
 
   const connection = await pool.getConnection();
 
@@ -231,7 +257,7 @@ async function applyStockMovement(input) {
     const nextBalance =
       definition.type === "entrada" ? previousBalance + quantity : previousBalance - quantity;
 
-    if (nextBalance < 0) {
+    if (nextBalance < 0 && shouldBlockNegativeStock()) {
       throw new HttpError("Saldo insuficiente para realizar a movimentacao informada", 409);
     }
 
@@ -239,6 +265,10 @@ async function applyStockMovement(input) {
       definition.type === "entrada" ? unitCostReference : Number(stock.ultimo_custo || unitCostReference || 0);
 
     await updateStockBalance(connection, productId, nextBalance, nextLastCost);
+
+    if (input.motivo === "compra") {
+      await updateProductCurrentCost(connection, productId, unitCostReference);
+    }
 
     const movementId = await insertStockMovement(connection, {
       produtoId: productId,
@@ -274,7 +304,62 @@ async function applyStockMovement(input) {
   }
 }
 
+async function registerPurchaseStockEntry(payload, userId) {
+  return applyStockMovement({
+    ...payload,
+    tipo: "entrada",
+    motivo: "compra",
+    usuario_id: userId,
+    origem: "compra",
+  });
+}
+
+async function registerCustomerReturnStockEntry(payload, userId) {
+  return applyStockMovement({
+    ...payload,
+    tipo: "entrada",
+    motivo: "devolucao_cliente",
+    usuario_id: userId,
+    origem: "devolucao_cliente",
+  });
+}
+
+async function registerSaleStockOutput(payload, userId) {
+  return applyStockMovement({
+    ...payload,
+    tipo: "saida",
+    motivo: "venda",
+    usuario_id: userId,
+    origem: "venda",
+  });
+}
+
+async function registerSaleCancellationStockEntry(payload, userId) {
+  return applyStockMovement({
+    ...payload,
+    tipo: "entrada",
+    motivo: "cancelamento_venda",
+    usuario_id: userId,
+    origem: "cancelamento_venda",
+  });
+}
+
+async function registerInternalConsumptionStockOutput(payload, userId) {
+  return applyStockMovement({
+    ...payload,
+    tipo: "saida",
+    motivo: "consumo_interno",
+    usuario_id: userId,
+    origem: "consumo_interno",
+  });
+}
+
 module.exports = {
   MOVEMENT_DEFINITIONS,
   applyStockMovement,
+  registerPurchaseStockEntry,
+  registerCustomerReturnStockEntry,
+  registerSaleStockOutput,
+  registerSaleCancellationStockEntry,
+  registerInternalConsumptionStockOutput,
 };
