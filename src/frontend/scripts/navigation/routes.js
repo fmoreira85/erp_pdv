@@ -5,6 +5,7 @@ import { renderLoginPage, setupLoginPage } from "../../pages/login/login.page.js
 import { renderForbiddenPage } from "../../pages/shared/forbidden.page.js";
 import { renderModulePage } from "../../pages/shared/module.page.js";
 import { renderNotFoundPage } from "../../pages/shared/notFound.page.js";
+import { renderStockPage, setupStockPage } from "../../pages/stock/stock.page.js";
 import { renderUsersPage, setupUsersPage } from "../../pages/users/users.page.js";
 
 function createModuleRoute(path, title, icon, moduleName, description) {
@@ -68,13 +69,17 @@ export const appRoutes = [
     "produtos",
     "Cadastro de produtos, precificacao, classificacao e status comercial."
   ),
-  createModuleRoute(
-    "estoque",
-    "Estoque",
-    "bi-box-seam",
-    "estoque",
-    "Controle de saldo atual, movimentacoes, perdas e ajustes."
-  ),
+  {
+    path: "estoque",
+    title: "Estoque",
+    icon: "bi-box-seam",
+    module: "estoque",
+    action: "view",
+    public: false,
+    guards: [requireAuth, requireModulePermission],
+    render: renderStockPage,
+    afterRender: setupStockPage,
+  },
   createModuleRoute(
     "clientes",
     "Clientes",
