@@ -282,6 +282,7 @@ CREATE TABLE vendas (
     cliente_id BIGINT UNSIGNED NULL,
     usuario_id BIGINT UNSIGNED NOT NULL,
     caixa_id BIGINT UNSIGNED NULL,
+    data_venda DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     tipo_venda ENUM('balcao', 'fiado', 'encomenda') NOT NULL DEFAULT 'balcao',
     status ENUM('aberta', 'finalizada', 'cancelada') NOT NULL DEFAULT 'aberta',
     subtotal DECIMAL(12,2) NOT NULL DEFAULT 0.00,
@@ -344,6 +345,7 @@ CREATE TABLE itens_vendidos (
     subtotal_bruto DECIMAL(12,2) NOT NULL,
     subtotal_liquido DECIMAL(12,2) NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     KEY idx_itens_vendidos_venda (venda_id),
     KEY idx_itens_vendidos_produto_created_at (produto_id, created_at),
@@ -370,10 +372,13 @@ CREATE TABLE pagamentos_venda (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     venda_id BIGINT UNSIGNED NOT NULL,
     forma_pagamento_id BIGINT UNSIGNED NOT NULL,
-    valor DECIMAL(12,2) NOT NULL,
+    valor_bruto DECIMAL(12,2) NOT NULL,
+    taxa DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    valor_liquido DECIMAL(12,2) NOT NULL,
     parcelas INT UNSIGNED NOT NULL DEFAULT 1,
     observacao VARCHAR(255) NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     KEY idx_pagamentos_venda_venda (venda_id),
     KEY idx_pagamentos_venda_forma (forma_pagamento_id),
@@ -386,7 +391,11 @@ CREATE TABLE pagamentos_venda (
         ON UPDATE CASCADE
         ON DELETE RESTRICT,
     CONSTRAINT chk_pagamentos_venda_valor
-        CHECK (valor >= 0.01)
+        CHECK (
+            valor_bruto >= 0.01
+            AND taxa >= 0
+            AND valor_liquido >= 0
+        )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE contas_receber (

@@ -85,12 +85,12 @@ INSERT INTO caixa (
     (2, 2, NULL, 'PDV-01', 'aberto', '2026-04-15 07:50:00', NULL, 150.00, 10.00, 35.00, 125.00, NULL, NULL, 'Caixa aberto para o turno atual', NULL, '2026-04-15 07:50:00', '2026-04-15 11:00:00');
 
 INSERT INTO vendas (
-    id, numero_venda, cliente_id, usuario_id, caixa_id, tipo_venda, status, subtotal, desconto,
+    id, numero_venda, cliente_id, usuario_id, caixa_id, data_venda, tipo_venda, status, subtotal, desconto,
     acrescimo, total_liquido, total_pago, troco, observacao, finalizada_em, cancelada_por,
     cancelada_em, motivo_cancelamento, created_at, updated_at
 ) VALUES
-    (1, 'VEN-20260414-0001', 1, 2, 1, 'balcao', 'finalizada', 104.98, 4.98, 0.00, 100.00, 100.00, 0.00, 'Venda mista com dinheiro e pix', '2026-04-14 09:35:00', NULL, NULL, NULL, '2026-04-14 09:30:00', '2026-04-14 09:35:00'),
-    (2, 'VEN-20260414-0002', 2, 2, 1, 'fiado', 'finalizada', 44.40, 0.00, 0.00, 44.40, 0.00, 0.00, 'Venda fiado para cliente cadastrado', '2026-04-14 16:15:00', NULL, NULL, NULL, '2026-04-14 16:10:00', '2026-04-14 16:15:00');
+    (1, 'VEN-20260414-0001', 1, 2, 1, '2026-04-14 09:30:00', 'balcao', 'finalizada', 104.98, 4.98, 0.00, 100.00, 100.00, 0.00, 'Venda mista com dinheiro e pix', '2026-04-14 09:35:00', NULL, NULL, NULL, '2026-04-14 09:30:00', '2026-04-14 09:35:00'),
+    (2, 'VEN-20260414-0002', 2, 2, 1, '2026-04-14 16:10:00', 'fiado', 'finalizada', 44.40, 0.00, 0.00, 44.40, 0.00, 0.00, 'Venda fiado para cliente cadastrado', '2026-04-14 16:15:00', NULL, NULL, NULL, '2026-04-14 16:10:00', '2026-04-14 16:15:00');
 
 INSERT INTO itens_vendidos (
     id, venda_id, produto_id, produto_nome_snapshot, produto_codigo_snapshot, unidade_medida_snapshot,
@@ -105,10 +105,12 @@ INSERT INTO itens_vendidos (
     (6, 2, 1, 'Arroz Tipo 1 5kg', '7891000000011', 'UN', 1.000, 24.90, 18.00, 0.00, 24.90, 24.90, '2026-04-14 16:11:00'),
     (7, 2, 7, 'Maca Gala Kg', '7891000000017', 'KG', 2.500, 7.80, 4.20, 0.00, 19.50, 19.50, '2026-04-14 16:11:00');
 
-INSERT INTO pagamentos_venda (id, venda_id, forma_pagamento_id, valor, parcelas, observacao, created_at) VALUES
-    (1, 1, 1, 70.00, 1, 'Recebido em dinheiro no caixa', '2026-04-14 09:35:00'),
-    (2, 1, 2, 30.00, 1, 'Complemento via pix', '2026-04-14 09:35:00'),
-    (3, 2, 4, 44.40, 1, 'Venda registrada como fiado', '2026-04-14 16:15:00');
+INSERT INTO pagamentos_venda (
+    id, venda_id, forma_pagamento_id, valor_bruto, taxa, valor_liquido, parcelas, observacao, created_at, updated_at
+) VALUES
+    (1, 1, 1, 70.00, 0.00, 70.00, 1, 'Recebido em dinheiro no caixa', '2026-04-14 09:35:00', '2026-04-14 09:35:00'),
+    (2, 1, 2, 30.00, 0.00, 30.00, 1, 'Complemento via pix', '2026-04-14 09:35:00', '2026-04-14 09:35:00'),
+    (3, 2, 4, 44.40, 0.00, 44.40, 1, 'Venda registrada como fiado', '2026-04-14 16:15:00', '2026-04-14 16:15:00');
 
 INSERT INTO contas_receber (
     id, cliente_id, venda_id, usuario_id, status, data_emissao, data_vencimento,

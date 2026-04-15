@@ -14,12 +14,13 @@ const PROFILE_PERMISSIONS = {
     estoque: ["view", "create", "update"],
     caixa: ["view", "open", "close", "manage"],
     vendas: ["view", "create", "update", "cancel"],
-    pdv: ["view", "create"],
+    pdv: ["view", "create", "update", "cancel"],
   },
   funcionario_pdv: {
     home: ["view"],
     clientes: ["view"],
-    pdv: ["view", "create"],
+    vendas: ["view", "create", "update", "cancel"],
+    pdv: ["view", "create", "update", "cancel"],
     caixa: ["view", "open", "close"],
   },
   funcionario_operacional: {
