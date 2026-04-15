@@ -128,16 +128,17 @@ INSERT INTO despesas (
     (1, 1, 3, 2, 1, 'Compra de panos e alcool para limpeza do caixa', 'Operacional', 35.00, '2026-04-15', '2026-04-15 11:00:00', 'paga', 'Despesa pequena paga direto no caixa do dia', '2026-04-15 11:00:00', '2026-04-15 11:00:00', NULL);
 
 INSERT INTO encomendas (
-    id, cliente_id, usuario_id, venda_id, status, data_prevista, subtotal, desconto, total,
-    sinal_valor, observacao, created_at, updated_at
+    id, fornecedor_id, usuario_id, data_encomenda, data_prevista, data_recebimento, status,
+    observacoes, valor_total, ativo, created_at, updated_at, deleted_at
 ) VALUES
-    (1, 3, 4, NULL, 'aberta', '2026-04-16', 38.70, 0.00, 38.70, 0.00, 'Cliente pediu separacao para retirada no dia seguinte', '2026-04-15 10:30:00', '2026-04-15 10:30:00');
+    (1, 1, 4, '2026-04-15', '2026-04-18', NULL, 'enviada', 'Pedido de reposicao de mercearia para o fim de semana', 113.20, 1, '2026-04-15 10:30:00', '2026-04-15 10:30:00', NULL);
 
 INSERT INTO encomenda_itens (
-    id, encomenda_id, produto_id, produto_nome_snapshot, quantidade, preco_unitario, subtotal, created_at
+    id, encomenda_id, produto_id, quantidade, preco_custo, subtotal, created_at, updated_at
 ) VALUES
-    (1, 1, 4, 'Refrigerante Cola 2L', 3.000, 9.90, 29.70, '2026-04-15 10:31:00'),
-    (2, 1, 5, 'Detergente Neutro 500ml', 2.000, 4.50, 9.00, '2026-04-15 10:31:00');
+    (1, 1, 1, 4.000, 18.00, 72.00, '2026-04-15 10:31:00', '2026-04-15 10:31:00'),
+    (2, 1, 2, 6.000, 6.20, 37.20, '2026-04-15 10:31:00', '2026-04-15 10:31:00'),
+    (3, 1, 3, 1.000, 4.00, 4.00, '2026-04-15 10:31:00', '2026-04-15 10:31:00');
 
 INSERT INTO movimentacoes_estoque (
     id, produto_id, usuario_id, fornecedor_id, venda_id, item_vendido_id, encomenda_id, tipo, origem,

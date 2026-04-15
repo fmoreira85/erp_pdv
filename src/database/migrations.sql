@@ -505,41 +505,34 @@ CREATE TABLE despesas (
 
 CREATE TABLE encomendas (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    cliente_id BIGINT UNSIGNED NOT NULL,
+    fornecedor_id BIGINT UNSIGNED NOT NULL,
     usuario_id BIGINT UNSIGNED NOT NULL,
-    venda_id BIGINT UNSIGNED NULL,
-    status ENUM('aberta', 'separando', 'pronta', 'retirada', 'cancelada') NOT NULL DEFAULT 'aberta',
+    data_encomenda DATE NOT NULL,
     data_prevista DATE NULL,
-    subtotal DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-    desconto DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-    total DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-    sinal_valor DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-    observacao VARCHAR(255) NULL,
+    data_recebimento DATETIME NULL,
+    status ENUM('aberta', 'enviada', 'recebida', 'cancelada') NOT NULL DEFAULT 'aberta',
+    observacoes VARCHAR(255) NULL,
+    valor_total DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    ativo TINYINT(1) NOT NULL DEFAULT 1,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at DATETIME NULL,
     PRIMARY KEY (id),
-    UNIQUE KEY uk_encomendas_venda (venda_id),
     KEY idx_encomendas_status_prevista (status, data_prevista),
-    KEY idx_encomendas_cliente (cliente_id),
+    KEY idx_encomendas_fornecedor (fornecedor_id),
     KEY idx_encomendas_usuario (usuario_id),
-    CONSTRAINT fk_encomendas_cliente
-        FOREIGN KEY (cliente_id) REFERENCES clientes (id)
+    KEY idx_encomendas_data_encomenda (data_encomenda),
+    CONSTRAINT fk_encomendas_fornecedor
+        FOREIGN KEY (fornecedor_id) REFERENCES fornecedores (id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT,
     CONSTRAINT fk_encomendas_usuario
         FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT,
-    CONSTRAINT fk_encomendas_venda
-        FOREIGN KEY (venda_id) REFERENCES vendas (id)
-        ON UPDATE CASCADE
-        ON DELETE SET NULL,
     CONSTRAINT chk_encomendas_valores
         CHECK (
-            subtotal >= 0
-            AND desconto >= 0
-            AND total >= 0
-            AND sinal_valor >= 0
+            valor_total >= 0
         )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -547,11 +540,11 @@ CREATE TABLE encomenda_itens (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     encomenda_id BIGINT UNSIGNED NOT NULL,
     produto_id BIGINT UNSIGNED NOT NULL,
-    produto_nome_snapshot VARCHAR(150) NOT NULL,
     quantidade DECIMAL(14,3) NOT NULL,
-    preco_unitario DECIMAL(12,2) NOT NULL,
+    preco_custo DECIMAL(12,2) NOT NULL,
     subtotal DECIMAL(12,2) NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     KEY idx_encomenda_itens_encomenda (encomenda_id),
     KEY idx_encomenda_itens_produto (produto_id),
@@ -566,7 +559,7 @@ CREATE TABLE encomenda_itens (
     CONSTRAINT chk_encomenda_itens_valores
         CHECK (
             quantidade > 0
-            AND preco_unitario >= 0
+            AND preco_custo >= 0
             AND subtotal >= 0
         )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
