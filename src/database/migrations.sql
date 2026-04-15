@@ -5,6 +5,7 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS caixa_movimentacoes;
+DROP TABLE IF EXISTS perdas;
 DROP TABLE IF EXISTS movimentacoes_estoque;
 DROP TABLE IF EXISTS auditoria_logs;
 DROP TABLE IF EXISTS encomenda_itens;
@@ -634,6 +635,52 @@ CREATE TABLE movimentacoes_estoque (
             AND saldo_anterior >= 0
             AND saldo_posterior >= 0
             AND custo_unitario_referencia >= 0
+        )
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE perdas (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    movimentacao_id BIGINT UNSIGNED NOT NULL,
+    produto_id BIGINT UNSIGNED NOT NULL,
+    quantidade DECIMAL(14,3) NOT NULL,
+    motivo ENUM(
+        'avaria',
+        'vencimento',
+        'consumo_interno',
+        'roubo_extravio',
+        'quebra_operacional',
+        'descarte_sanitario'
+    ) NOT NULL,
+    observacao VARCHAR(255) NULL,
+    usuario_id BIGINT UNSIGNED NOT NULL,
+    data_perda DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    estoque_antes DECIMAL(14,3) NOT NULL,
+    estoque_depois DECIMAL(14,3) NOT NULL,
+    referencia_tipo ENUM('venda', 'item_vendido', 'encomenda') NULL,
+    referencia_id BIGINT UNSIGNED NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_perdas_movimentacao (movimentacao_id),
+    KEY idx_perdas_produto_data (produto_id, data_perda),
+    KEY idx_perdas_motivo_data (motivo, data_perda),
+    KEY idx_perdas_usuario_data (usuario_id, data_perda),
+    CONSTRAINT fk_perdas_movimentacao
+        FOREIGN KEY (movimentacao_id) REFERENCES movimentacoes_estoque (id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    CONSTRAINT fk_perdas_produto
+        FOREIGN KEY (produto_id) REFERENCES produtos (id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    CONSTRAINT fk_perdas_usuario
+        FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    CONSTRAINT chk_perdas_valores
+        CHECK (
+            quantidade > 0
+            AND estoque_antes >= 0
         )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

@@ -196,6 +196,24 @@ function ensureMovementBusinessRules({ reason, supplierId, referenciaTipo, refer
 }
 
 async function applyStockMovement(input) {
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const movement = await applyStockMovementWithExecutor(connection, input);
+
+    await connection.commit();
+    return movement;
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
+async function applyStockMovementWithExecutor(executor, input) {
   const definition = resolveMovementDefinition(input.tipo, input.motivo);
   const productId = Number(input.produto_id);
   const userId = Number(input.usuario_id);
@@ -237,71 +255,67 @@ async function applyStockMovement(input) {
     motivoDetalhado,
   });
 
-  const connection = await pool.getConnection();
+  let stock = await findStockByProductIdForUpdate(executor, productId);
 
-  try {
-    await connection.beginTransaction();
-
-    let stock = await findStockByProductIdForUpdate(connection, productId);
-
-    if (!stock) {
-      await createStockRecord(connection, productId, unitCostReference);
-      stock = {
-        produto_id: productId,
-        quantidade_atual: 0,
-        ultimo_custo: unitCostReference,
-      };
-    }
-
-    const previousBalance = Number(stock.quantidade_atual || 0);
-    const nextBalance =
-      definition.type === "entrada" ? previousBalance + quantity : previousBalance - quantity;
-
-    if (nextBalance < 0 && shouldBlockNegativeStock()) {
-      throw new HttpError("Saldo insuficiente para realizar a movimentacao informada", 409);
-    }
-
-    const nextLastCost =
-      definition.type === "entrada" ? unitCostReference : Number(stock.ultimo_custo || unitCostReference || 0);
-
-    await updateStockBalance(connection, productId, nextBalance, nextLastCost);
-
-    if (input.motivo === "compra") {
-      await updateProductCurrentCost(connection, productId, unitCostReference);
-    }
-
-    const movementId = await insertStockMovement(connection, {
-      produtoId: productId,
-      usuarioId: userId,
-      fornecedorId: supplierId,
-      vendaId: referenceFields.vendaId,
-      itemVendidoId: referenceFields.itemVendidoId,
-      encomendaId: referenceFields.encomendaId,
-      dbType: definition.dbType,
-      origem,
-      motivoDetalhado,
-      quantidade: quantity,
-      saldoAnterior: previousBalance,
-      saldoPosterior: nextBalance,
-      custoUnitarioReferencia: unitCostReference,
-      lote,
-      dataValidade,
-      documentoReferencia,
-      observacao,
-    });
-
-    await connection.commit();
-
-    return {
-      id: movementId,
+  if (!stock) {
+    await createStockRecord(executor, productId, unitCostReference);
+    stock = {
       produto_id: productId,
+      quantidade_atual: 0,
+      ultimo_custo: unitCostReference,
     };
-  } catch (error) {
-    await connection.rollback();
-    throw error;
-  } finally {
-    connection.release();
   }
+
+  const previousBalance = Number(stock.quantidade_atual || 0);
+  const nextBalance = definition.type === "entrada" ? previousBalance + quantity : previousBalance - quantity;
+
+  if (nextBalance < 0 && shouldBlockNegativeStock()) {
+    throw new HttpError("Saldo insuficiente para realizar a movimentacao informada", 409);
+  }
+
+  const nextLastCost =
+    definition.type === "entrada" ? unitCostReference : Number(stock.ultimo_custo || unitCostReference || 0);
+
+  await updateStockBalance(executor, productId, nextBalance, nextLastCost);
+
+  if (input.motivo === "compra") {
+    await updateProductCurrentCost(executor, productId, unitCostReference);
+  }
+
+  const movementId = await insertStockMovement(executor, {
+    produtoId: productId,
+    usuarioId: userId,
+    fornecedorId: supplierId,
+    vendaId: referenceFields.vendaId,
+    itemVendidoId: referenceFields.itemVendidoId,
+    encomendaId: referenceFields.encomendaId,
+    dbType: definition.dbType,
+    origem,
+    motivoDetalhado,
+    quantidade: quantity,
+    saldoAnterior: previousBalance,
+    saldoPosterior: nextBalance,
+    custoUnitarioReferencia: unitCostReference,
+    lote,
+    dataValidade,
+    documentoReferencia,
+    observacao,
+  });
+
+  return {
+    id: movementId,
+    produto_id: productId,
+    tipo: definition.type,
+    motivo: input.motivo,
+    quantidade: quantity,
+    estoque_antes: previousBalance,
+    estoque_depois: nextBalance,
+    custo_unitario_referencia: unitCostReference,
+    usuario_id: userId,
+    fornecedor_id: supplierId,
+    referencia_tipo: input.referencia_tipo || null,
+    referencia_id: referenceId,
+  };
 }
 
 async function registerPurchaseStockEntry(payload, userId) {
@@ -357,6 +371,7 @@ async function registerInternalConsumptionStockOutput(payload, userId) {
 module.exports = {
   MOVEMENT_DEFINITIONS,
   applyStockMovement,
+  applyStockMovementWithExecutor,
   registerPurchaseStockEntry,
   registerCustomerReturnStockEntry,
   registerSaleStockOutput,
