@@ -27,6 +27,9 @@ export function fetchStockProducts(filters = {}) {
       categoria_id: filters.categoria_id,
       subcategoria_id: filters.subcategoria_id,
       status: filters.status,
+      abaixo_estoque_minimo: filters.abaixo_estoque_minimo,
+      validade_proxima: filters.validade_proxima,
+      dias_validade: filters.dias_validade,
     })}`
   );
 }
