@@ -2,6 +2,7 @@ import { redirectIfAuthenticated, requireAuth } from "../../middlewares/auth.gua
 import { requireModulePermission } from "../../middlewares/role.guard.js";
 import { renderDashboardPage, setupDashboardPage } from "../../pages/dashboard/dashboard.page.js";
 import { renderLoginPage, setupLoginPage } from "../../pages/login/login.page.js";
+import { renderPdvPage, setupPdvPage } from "../../pages/pdv/pdv.page.js";
 import { renderForbiddenPage } from "../../pages/shared/forbidden.page.js";
 import { renderModulePage } from "../../pages/shared/module.page.js";
 import { renderNotFoundPage } from "../../pages/shared/notFound.page.js";
@@ -48,13 +49,17 @@ export const appRoutes = [
     render: renderDashboardPage,
     afterRender: setupDashboardPage,
   },
-  createModuleRoute(
-    "pdv",
-    "PDV",
-    "bi-upc-scan",
-    "pdv",
-    "Fluxo rapido de venda, carrinho, pagamento e integracao com caixa."
-  ),
+  {
+    path: "pdv",
+    title: "PDV",
+    icon: "bi-upc-scan",
+    module: "pdv",
+    action: "view",
+    public: false,
+    guards: [requireAuth, requireModulePermission],
+    render: renderPdvPage,
+    afterRender: setupPdvPage,
+  },
   createModuleRoute(
     "caixa",
     "Caixa",

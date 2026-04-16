@@ -21,18 +21,45 @@ const {
 
 const router = express.Router();
 
-router.use(authMiddleware, authorizeRoles("admin", "funcionario_operacional"));
+router.use(authMiddleware);
 
-router.get("/", validateListProductsQuery, asyncHandler(list));
-router.get("/:id", validateProductIdParam, asyncHandler(getById));
-router.post("/", validateCreateProductRequest, asyncHandler(create));
-router.put("/:id", validateProductIdParam, validateUpdateProductRequest, asyncHandler(update));
+router.get(
+  "/",
+  authorizeRoles("admin", "funcionario_operacional", "funcionario_pdv"),
+  validateListProductsQuery,
+  asyncHandler(list)
+);
+router.get(
+  "/:id",
+  authorizeRoles("admin", "funcionario_operacional", "funcionario_pdv"),
+  validateProductIdParam,
+  asyncHandler(getById)
+);
+router.post(
+  "/",
+  authorizeRoles("admin", "funcionario_operacional"),
+  validateCreateProductRequest,
+  asyncHandler(create)
+);
+router.put(
+  "/:id",
+  authorizeRoles("admin", "funcionario_operacional"),
+  validateProductIdParam,
+  validateUpdateProductRequest,
+  asyncHandler(update)
+);
 router.patch(
   "/:id/status",
+  authorizeRoles("admin", "funcionario_operacional"),
   validateProductIdParam,
   validateUpdateProductStatusRequest,
   asyncHandler(updateStatus)
 );
-router.delete("/:id", validateProductIdParam, asyncHandler(remove));
+router.delete(
+  "/:id",
+  authorizeRoles("admin", "funcionario_operacional"),
+  validateProductIdParam,
+  asyncHandler(remove)
+);
 
 module.exports = router;
