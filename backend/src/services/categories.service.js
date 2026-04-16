@@ -1,4 +1,5 @@
 const { HttpError } = require("../utils/httpError");
+const { normalizeOptionalText } = require("../utils/sanitize");
 const {
   createCategory,
   findCategoryById,
@@ -18,16 +19,7 @@ const ACTIVE_DB_STATUS = "ativa";
 const INACTIVE_DB_STATUS = "inativa";
 
 function normalizeName(value) {
-  return value.trim();
-}
-
-function normalizeOptionalText(value) {
-  if (value === undefined || value === null) {
-    return null;
-  }
-
-  const normalizedValue = String(value).trim();
-  return normalizedValue ? normalizedValue : null;
+  return String(value).trim();
 }
 
 function toDatabaseStatus(ativo = true) {

@@ -1,4 +1,5 @@
 const { HttpError } = require("../utils/httpError");
+const { normalizeLowercaseText, normalizeOptionalText, normalizeUppercaseText } = require("../utils/sanitize");
 const {
   createClient,
   findClientByCpfCnpj,
@@ -22,23 +23,12 @@ function stripNonDigits(value) {
   return String(value || "").replace(/\D/g, "");
 }
 
-function normalizeOptionalText(value) {
-  if (value === undefined || value === null) {
-    return null;
-  }
-
-  const normalizedValue = String(value).trim();
-  return normalizedValue ? normalizedValue : null;
-}
-
 function normalizeEmail(value) {
-  const normalizedValue = normalizeOptionalText(value);
-  return normalizedValue ? normalizedValue.toLowerCase() : null;
+  return normalizeLowercaseText(value);
 }
 
 function normalizeState(value) {
-  const normalizedValue = normalizeOptionalText(value);
-  return normalizedValue ? normalizedValue.toUpperCase() : null;
+  return normalizeUppercaseText(value);
 }
 
 function isUpcomingDate(dateValue, days = UPCOMING_DUE_DAYS) {

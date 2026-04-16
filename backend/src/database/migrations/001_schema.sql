@@ -2,9 +2,6 @@
 -- Execute este arquivo depois de selecionar/criar o schema desejado no MySQL.
 
 SET NAMES utf8mb4;
--- Arquivo legado consolidado.
--- Preferencia atual: manter novas evolucoes em backend/src/database/migrations/ por versao.
-
 SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS caixa_movimentacoes;

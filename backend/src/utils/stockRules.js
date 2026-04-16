@@ -1,5 +1,7 @@
-const STOCK_EXPIRING_SOON_DAYS = Number(process.env.STOCK_EXPIRING_SOON_DAYS) || 7;
-const ALLOW_NEGATIVE_STOCK = String(process.env.ALLOW_NEGATIVE_STOCK || "false") === "true";
+const { env } = require("../config/env");
+
+const STOCK_EXPIRING_SOON_DAYS = env.stock.expiringSoonDays;
+const ALLOW_NEGATIVE_STOCK = env.stock.allowNegativeStock;
 const NEGATIVE_STOCK_POLICY = ALLOW_NEGATIVE_STOCK ? "allow" : "block";
 
 const REASONS_REQUIRING_REFERENCE = new Set([

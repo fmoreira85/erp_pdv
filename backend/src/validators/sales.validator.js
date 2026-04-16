@@ -1,21 +1,10 @@
 const { HttpError } = require("../utils/httpError");
+const {
+  validateNonNegativeNumber,
+  validatePaginationQuery,
+  validatePositiveInteger,
+} = require("../utils/validation");
 const { SALE_STATUS } = require("../services/sales.service");
-
-function validatePositiveInteger(value, fieldLabel) {
-  const parsed = Number(value);
-
-  if (!Number.isInteger(parsed) || parsed <= 0) {
-    throw new HttpError(`${fieldLabel} deve ser um numero inteiro positivo`, 400);
-  }
-}
-
-function validateNonNegativeNumber(value, fieldLabel) {
-  const parsed = Number(value);
-
-  if (!Number.isFinite(parsed) || parsed < 0) {
-    throw new HttpError(`${fieldLabel} deve ser maior ou igual a zero`, 400);
-  }
-}
 
 function validateSaleIdParam(req, res, next) {
   try {
@@ -100,16 +89,7 @@ function validateCommonDraftBody(body, requireItems = false) {
 
 function validateListSalesQuery(req, res, next) {
   try {
-    const page = req.query.page ? Number(req.query.page) : 1;
-    const limit = req.query.limit ? Number(req.query.limit) : 10;
-
-    if (!Number.isInteger(page) || page <= 0) {
-      throw new HttpError("O parametro page deve ser um numero inteiro positivo", 400);
-    }
-
-    if (!Number.isInteger(limit) || limit <= 0 || limit > 100) {
-      throw new HttpError("O parametro limit deve estar entre 1 e 100", 400);
-    }
+    validatePaginationQuery(req.query.page, req.query.limit);
 
     if (req.query.status && !SALE_STATUS.includes(req.query.status)) {
       throw new HttpError("O filtro status informado e invalido", 400);

@@ -1,42 +1,17 @@
 const { HttpError } = require("../utils/httpError");
+const {
+  isValidDateString,
+  validateNonNegativeNumber,
+  validatePaginationQuery,
+  validatePositiveInteger,
+  validatePositiveNumber,
+} = require("../utils/validation");
 const { MOVEMENT_DEFINITIONS } = require("../services/stock.service");
 const { MOVEMENT_TYPE_FILTERS, REFERENCE_TYPES } = require("../services/stockMovements.service");
-
-function validatePositiveInteger(value, fieldLabel) {
-  const parsedValue = Number(value);
-
-  if (!Number.isInteger(parsedValue) || parsedValue <= 0) {
-    throw new HttpError(`${fieldLabel} deve ser um numero inteiro positivo`, 400);
-  }
-}
-
-function validatePositiveNumber(value, fieldLabel) {
-  const parsedValue = Number(value);
-
-  if (!Number.isFinite(parsedValue) || parsedValue <= 0) {
-    throw new HttpError(`${fieldLabel} deve ser maior que zero`, 400);
-  }
-}
-
-function validateNonNegativeNumber(value, fieldLabel) {
-  const parsedValue = Number(value);
-
-  if (!Number.isFinite(parsedValue) || parsedValue < 0) {
-    throw new HttpError(`${fieldLabel} deve ser maior ou igual a zero`, 400);
-  }
-}
 
 function isValidDateTimeString(value) {
   const parsedDate = new Date(value);
   return !Number.isNaN(parsedDate.getTime());
-}
-
-function isValidDateString(value) {
-  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value.trim())) {
-    return false;
-  }
-
-  return isValidDateTimeString(`${value}T00:00:00`);
 }
 
 function validateMovementIdParam(req, res, next) {
@@ -61,16 +36,7 @@ function validateProductHistoryParam(req, res, next) {
 
 function validateListStockMovementsQuery(req, res, next) {
   try {
-    const page = req.query.page ? Number(req.query.page) : 1;
-    const limit = req.query.limit ? Number(req.query.limit) : 10;
-
-    if (!Number.isInteger(page) || page <= 0) {
-      throw new HttpError("O parametro page deve ser um numero inteiro positivo", 400);
-    }
-
-    if (!Number.isInteger(limit) || limit <= 0 || limit > 100) {
-      throw new HttpError("O parametro limit deve estar entre 1 e 100", 400);
-    }
+    validatePaginationQuery(req.query.page, req.query.limit);
 
     if (req.query.produto_id) {
       validatePositiveInteger(req.query.produto_id, "O filtro produto_id");

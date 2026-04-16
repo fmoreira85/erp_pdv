@@ -1,4 +1,5 @@
 const { HttpError } = require("../utils/httpError");
+const { isValidDateString, validatePaginationQuery, validatePositiveInteger } = require("../utils/validation");
 const {
   AVAILABLE_STATUS,
   CLIENT_TYPES,
@@ -8,14 +9,6 @@ const {
 } = require("../services/clients.service");
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function validatePositiveInteger(value, fieldLabel) {
-  const parsedValue = Number(value);
-
-  if (!Number.isInteger(parsedValue) || parsedValue <= 0) {
-    throw new HttpError(`${fieldLabel} deve ser um numero inteiro positivo`, 400);
-  }
-}
 
 function validateClientIdParam(req, res, next) {
   const clientId = Number(req.params.id);
@@ -28,30 +21,25 @@ function validateClientIdParam(req, res, next) {
 }
 
 function validateListClientsQuery(req, res, next) {
-  const page = req.query.page ? Number(req.query.page) : 1;
-  const limit = req.query.limit ? Number(req.query.limit) : 10;
+  try {
+    validatePaginationQuery(req.query.page, req.query.limit);
 
-  if (!Number.isInteger(page) || page <= 0) {
-    return next(new HttpError("O parametro page deve ser um numero inteiro positivo", 400));
+    if (req.query.status && !AVAILABLE_STATUS.includes(req.query.status)) {
+      throw new HttpError("O filtro de status informado e invalido", 400);
+    }
+
+    if (req.query.tipo_pessoa && !CLIENT_TYPES.includes(req.query.tipo_pessoa)) {
+      throw new HttpError("O filtro de tipo_pessoa informado e invalido", 400);
+    }
+
+    if (req.query.status_financeiro && !FINANCIAL_STATUSES.includes(req.query.status_financeiro)) {
+      throw new HttpError("O filtro de status_financeiro informado e invalido", 400);
+    }
+
+    return next();
+  } catch (error) {
+    return next(error);
   }
-
-  if (!Number.isInteger(limit) || limit <= 0 || limit > 100) {
-    return next(new HttpError("O parametro limit deve estar entre 1 e 100", 400));
-  }
-
-  if (req.query.status && !AVAILABLE_STATUS.includes(req.query.status)) {
-    return next(new HttpError("O filtro de status informado e invalido", 400));
-  }
-
-  if (req.query.tipo_pessoa && !CLIENT_TYPES.includes(req.query.tipo_pessoa)) {
-    return next(new HttpError("O filtro de tipo_pessoa informado e invalido", 400));
-  }
-
-  if (req.query.status_financeiro && !FINANCIAL_STATUSES.includes(req.query.status_financeiro)) {
-    return next(new HttpError("O filtro de status_financeiro informado e invalido", 400));
-  }
-
-  return next();
 }
 
 function validateCpfCnpjByType(tipoPessoa, cpfCnpj) {
@@ -100,7 +88,7 @@ function validateCommonClientFields(body) {
   }
 
   if (body.data_nascimento !== undefined && body.data_nascimento !== null && body.data_nascimento !== "") {
-    if (typeof body.data_nascimento !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(body.data_nascimento.trim())) {
+    if (typeof body.data_nascimento !== "string" || !isValidDateString(body.data_nascimento)) {
       throw new HttpError("A data_nascimento deve estar no formato YYYY-MM-DD", 400);
     }
   }

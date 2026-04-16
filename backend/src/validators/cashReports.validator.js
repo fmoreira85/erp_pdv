@@ -1,37 +1,12 @@
 const { HttpError } = require("../utils/httpError");
+const { isValidDateString, validatePaginationQuery, validatePositiveInteger } = require("../utils/validation");
 
 const CASH_REPORT_STATUSES = ["aberto", "fechado", "divergente", "cancelado"];
 const DIFFERENCE_TYPES = ["sobra", "falta", "sem_diferenca"];
 
-function isValidDateString(value) {
-  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value.trim())) {
-    return false;
-  }
-
-  const parsedDate = new Date(`${value}T00:00:00`);
-  return !Number.isNaN(parsedDate.getTime());
-}
-
-function validatePositiveInteger(value, fieldLabel) {
-  const parsed = Number(value);
-
-  if (!Number.isInteger(parsed) || parsed <= 0) {
-    throw new HttpError(`${fieldLabel} deve ser um numero inteiro positivo`, 400);
-  }
-}
-
 function validateReportQuery(req, res, next) {
   try {
-    const page = req.query.page ? Number(req.query.page) : 1;
-    const limit = req.query.limit ? Number(req.query.limit) : 10;
-
-    if (!Number.isInteger(page) || page <= 0) {
-      throw new HttpError("O parametro page deve ser um numero inteiro positivo", 400);
-    }
-
-    if (!Number.isInteger(limit) || limit <= 0 || limit > 100) {
-      throw new HttpError("O parametro limit deve estar entre 1 e 100", 400);
-    }
+    validatePaginationQuery(req.query.page, req.query.limit);
 
     if (req.query.operador_id) {
       validatePositiveInteger(req.query.operador_id, "O filtro operador_id");

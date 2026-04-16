@@ -1,4 +1,5 @@
 const { HttpError } = require("../utils/httpError");
+const { isValidDateString, validatePaginationQuery, validatePositiveInteger } = require("../utils/validation");
 const { ORDER_ACTIVE_FILTERS, ORDER_STATUSES } = require("../services/orders.service");
 
 function validateOrderIdParam(req, res, next) {
@@ -9,15 +10,6 @@ function validateOrderIdParam(req, res, next) {
   }
 
   return next();
-}
-
-function isValidDateString(value) {
-  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value.trim())) {
-    return false;
-  }
-
-  const parsedDate = new Date(`${value}T00:00:00`);
-  return !Number.isNaN(parsedDate.getTime());
 }
 
 function validateItems(items) {
@@ -92,46 +84,41 @@ function validateCommonOrderFields(body) {
 }
 
 function validateListOrdersQuery(req, res, next) {
-  const page = req.query.page ? Number(req.query.page) : 1;
-  const limit = req.query.limit ? Number(req.query.limit) : 10;
+  try {
+    validatePaginationQuery(req.query.page, req.query.limit);
 
-  if (!Number.isInteger(page) || page <= 0) {
-    return next(new HttpError("O parametro page deve ser um numero inteiro positivo", 400));
+    if (req.query.status && !ORDER_STATUSES.includes(req.query.status)) {
+      throw new HttpError("O filtro de status informado e invalido", 400);
+    }
+
+    if (req.query.fornecedor_id) {
+      validatePositiveInteger(req.query.fornecedor_id, "O filtro fornecedor_id");
+    }
+
+    if (req.query.usuario_id) {
+      validatePositiveInteger(req.query.usuario_id, "O filtro usuario_id");
+    }
+
+    if (req.query.ativo && !ORDER_ACTIVE_FILTERS.includes(req.query.ativo)) {
+      throw new HttpError("O filtro ativo deve ser true, false ou todos", 400);
+    }
+
+    if (req.query.data_inicial && !isValidDateString(req.query.data_inicial)) {
+      throw new HttpError("O filtro data_inicial deve estar no formato YYYY-MM-DD", 400);
+    }
+
+    if (req.query.data_final && !isValidDateString(req.query.data_final)) {
+      throw new HttpError("O filtro data_final deve estar no formato YYYY-MM-DD", 400);
+    }
+
+    if (req.query.data_inicial && req.query.data_final && req.query.data_final < req.query.data_inicial) {
+      throw new HttpError("O periodo informado e invalido: data_final menor que data_inicial", 400);
+    }
+
+    return next();
+  } catch (error) {
+    return next(error);
   }
-
-  if (!Number.isInteger(limit) || limit <= 0 || limit > 100) {
-    return next(new HttpError("O parametro limit deve estar entre 1 e 100", 400));
-  }
-
-  if (req.query.status && !ORDER_STATUSES.includes(req.query.status)) {
-    return next(new HttpError("O filtro de status informado e invalido", 400));
-  }
-
-  if (req.query.fornecedor_id && (!Number.isInteger(Number(req.query.fornecedor_id)) || Number(req.query.fornecedor_id) <= 0)) {
-    return next(new HttpError("O filtro fornecedor_id e invalido", 400));
-  }
-
-  if (req.query.usuario_id && (!Number.isInteger(Number(req.query.usuario_id)) || Number(req.query.usuario_id) <= 0)) {
-    return next(new HttpError("O filtro usuario_id e invalido", 400));
-  }
-
-  if (req.query.ativo && !ORDER_ACTIVE_FILTERS.includes(req.query.ativo)) {
-    return next(new HttpError("O filtro ativo deve ser true, false ou todos", 400));
-  }
-
-  if (req.query.data_inicial && !isValidDateString(req.query.data_inicial)) {
-    return next(new HttpError("O filtro data_inicial deve estar no formato YYYY-MM-DD", 400));
-  }
-
-  if (req.query.data_final && !isValidDateString(req.query.data_final)) {
-    return next(new HttpError("O filtro data_final deve estar no formato YYYY-MM-DD", 400));
-  }
-
-  if (req.query.data_inicial && req.query.data_final && req.query.data_final < req.query.data_inicial) {
-    return next(new HttpError("O periodo informado e invalido: data_final menor que data_inicial", 400));
-  }
-
-  return next();
 }
 
 function validateCreateOrderRequest(req, res, next) {

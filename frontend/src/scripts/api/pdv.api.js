@@ -1,20 +1,6 @@
 import { request } from "./apiClient.js";
 import { CLIENT_SEARCH_LIMIT, PRODUCT_SEARCH_LIMIT } from "../pdv/pdv.constants.js";
-
-function buildQuery(filters = {}) {
-  const params = new URLSearchParams();
-
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value === undefined || value === null || value === "") {
-      return;
-    }
-
-    params.set(key, String(value));
-  });
-
-  const queryString = params.toString();
-  return queryString ? `?${queryString}` : "";
-}
+import { buildQueryString } from "../../utils/queryParams.js";
 
 export function fetchPdvContext() {
   return request("/pdv");
@@ -22,7 +8,7 @@ export function fetchPdvContext() {
 
 export function searchPdvProducts(filters = {}) {
   return request(
-    `/produtos${buildQuery({
+    `/produtos${buildQueryString({
       page: 1,
       limit: filters.limit || PRODUCT_SEARCH_LIMIT,
       status: "ativo",
@@ -33,7 +19,7 @@ export function searchPdvProducts(filters = {}) {
 
 export function searchPdvClients(filters = {}) {
   return request(
-    `/clientes${buildQuery({
+    `/clientes${buildQueryString({
       page: 1,
       limit: filters.limit || CLIENT_SEARCH_LIMIT,
       status: "ativo",

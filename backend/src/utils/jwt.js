@@ -1,7 +1,8 @@
 const jwt = require("jsonwebtoken");
+const { env } = require("../config/env");
 
-const JWT_SECRET = process.env.JWT_SECRET || "erp-pdv-dev-secret";
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "8h";
+const JWT_SECRET = env.auth.jwtSecret;
+const JWT_EXPIRES_IN = env.auth.jwtExpiresIn;
 
 function generateToken(payload) {
   return jwt.sign(payload, JWT_SECRET, {

@@ -1,4 +1,5 @@
 const { HttpError } = require("../utils/httpError");
+const { normalizeOptionalText } = require("../utils/sanitize");
 const {
   pool,
   createProduct,
@@ -22,16 +23,7 @@ const AVAILABLE_UNITS = ["UN", "KG", "G", "L", "ML", "CX", "PCT"];
 const DEFAULT_EXPIRING_WITHIN_DAYS = 30;
 
 function normalizeText(value) {
-  return value.trim();
-}
-
-function normalizeOptionalText(value) {
-  if (value === undefined || value === null) {
-    return null;
-  }
-
-  const normalizedValue = String(value).trim();
-  return normalizedValue ? normalizedValue : null;
+  return String(value).trim();
 }
 
 function normalizeMoney(value) {

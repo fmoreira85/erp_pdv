@@ -1,3 +1,4 @@
+const { env } = require("../config/env");
 const { buildAuditPayloadFromRequest, registerAuditEventSafe } = require("../services/audit.service");
 const { sendError } = require("../utils/response");
 
@@ -21,7 +22,7 @@ function errorMiddleware(error, req, res, next) {
     }));
   }
 
-  if (process.env.NODE_ENV !== "test") {
+  if (env.nodeEnv !== "test") {
     console.error(error);
   }
 

@@ -1,19 +1,5 @@
 import { request } from "./apiClient.js";
-
-function buildQuery(filters = {}) {
-  const params = new URLSearchParams();
-
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value === undefined || value === null || value === "") {
-      return;
-    }
-
-    params.set(key, String(value));
-  });
-
-  const queryString = params.toString();
-  return queryString ? `?${queryString}` : "";
-}
+import { buildQueryString } from "../../utils/queryParams.js";
 
 export function fetchCurrentCash() {
   return request("/caixa/atual");
@@ -35,7 +21,7 @@ export function fetchCashSummary(cashId) {
 }
 
 export function fetchCashMovements(cashId, filters = {}) {
-  return request(`/caixa/${cashId}/movimentacoes${buildQuery(filters)}`);
+  return request(`/caixa/${cashId}/movimentacoes${buildQueryString(filters)}`);
 }
 
 export function registerCashWithdrawal(cashId, payload) {
@@ -60,5 +46,5 @@ export function closeCash(cashId, payload) {
 }
 
 export function listCashHistory(filters = {}) {
-  return request(`/caixa${buildQuery(filters)}`);
+  return request(`/caixa${buildQueryString(filters)}`);
 }

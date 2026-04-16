@@ -1,6 +1,3 @@
--- Arquivo legado consolidado.
--- Preferencia atual: manter novos seeders em backend/src/database/seeders/ por versao.
-
 -- Seed inicial do projeto ERP + PDV + CRM
 -- Dados fictícios, mas coerentes com os fluxos de login, estoque, caixa, PDV e fiado.
 

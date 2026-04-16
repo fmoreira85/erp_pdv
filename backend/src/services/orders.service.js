@@ -1,4 +1,5 @@
 const { HttpError } = require("../utils/httpError");
+const { normalizeOptionalText } = require("../utils/sanitize");
 const { findProductById } = require("../repositories/products.repository");
 const { findSupplierById } = require("../repositories/suppliers.repository");
 const {
@@ -23,24 +24,6 @@ const STATUS_TRANSITIONS = {
   recebida: [],
   cancelada: [],
 };
-
-function normalizeOptionalText(value) {
-  if (value === undefined || value === null) {
-    return null;
-  }
-
-  const normalizedValue = String(value).trim();
-  return normalizedValue ? normalizedValue : null;
-}
-
-function isValidDateString(value) {
-  if (!value) {
-    return false;
-  }
-
-  const parsedDate = new Date(`${value}T00:00:00`);
-  return !Number.isNaN(parsedDate.getTime());
-}
 
 function calculateItemSubtotal(item) {
   const quantity = Number(item.quantidade);

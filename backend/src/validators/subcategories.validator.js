@@ -1,13 +1,6 @@
 const { HttpError } = require("../utils/httpError");
+const { validatePaginationQuery, validatePositiveInteger } = require("../utils/validation");
 const { AVAILABLE_STATUS } = require("../services/subcategories.service");
-
-function validatePositiveInteger(value, fieldLabel) {
-  const parsedValue = Number(value);
-
-  if (!Number.isInteger(parsedValue) || parsedValue <= 0) {
-    throw new HttpError(`${fieldLabel} deve ser um numero inteiro positivo`, 400);
-  }
-}
 
 function validateSubcategoryIdParam(req, res, next) {
   const subcategoryId = Number(req.params.id);
@@ -20,30 +13,21 @@ function validateSubcategoryIdParam(req, res, next) {
 }
 
 function validateListSubcategoriesQuery(req, res, next) {
-  const page = req.query.page ? Number(req.query.page) : 1;
-  const limit = req.query.limit ? Number(req.query.limit) : 10;
+  try {
+    validatePaginationQuery(req.query.page, req.query.limit);
 
-  if (!Number.isInteger(page) || page <= 0) {
-    return next(new HttpError("O parametro page deve ser um numero inteiro positivo", 400));
-  }
-
-  if (!Number.isInteger(limit) || limit <= 0 || limit > 100) {
-    return next(new HttpError("O parametro limit deve estar entre 1 e 100", 400));
-  }
-
-  if (req.query.categoria_id) {
-    try {
+    if (req.query.categoria_id) {
       validatePositiveInteger(req.query.categoria_id, "O filtro categoria_id");
-    } catch (error) {
-      return next(error);
     }
-  }
 
-  if (req.query.status && !AVAILABLE_STATUS.includes(req.query.status)) {
-    return next(new HttpError("O filtro de status informado e invalido", 400));
-  }
+    if (req.query.status && !AVAILABLE_STATUS.includes(req.query.status)) {
+      throw new HttpError("O filtro de status informado e invalido", 400);
+    }
 
-  return next();
+    return next();
+  } catch (error) {
+    return next(error);
+  }
 }
 
 function validateCommonSubcategoryFields(body) {

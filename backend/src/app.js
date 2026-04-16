@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 
+const { env } = require("./config/env");
 const { auditContextMiddleware } = require("./middlewares/auditContext.middleware");
 const routes = require("./routes");
 const { notFoundMiddleware } = require("./middlewares/notFound.middleware");
@@ -10,7 +11,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "*",
+    origin: env.corsOrigin,
   })
 );
 

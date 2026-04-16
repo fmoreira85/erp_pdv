@@ -1,4 +1,5 @@
 const { HttpError } = require("../utils/httpError");
+const { normalizeOptionalText } = require("../utils/sanitize");
 
 function roundMoney(value) {
   return Number(Number(value || 0).toFixed(2));
@@ -6,15 +7,6 @@ function roundMoney(value) {
 
 function roundQuantity(value) {
   return Number(Number(value || 0).toFixed(3));
-}
-
-function normalizeOptionalText(value) {
-  if (value === undefined || value === null) {
-    return null;
-  }
-
-  const normalized = String(value).trim();
-  return normalized ? normalized : null;
 }
 
 function aggregateItemsByProduct(items) {

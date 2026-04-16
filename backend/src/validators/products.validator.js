@@ -1,36 +1,12 @@
 const { HttpError } = require("../utils/httpError");
+const {
+  isValidDateString,
+  validateBooleanField,
+  validateNonNegativeNumber,
+  validatePaginationQuery,
+  validatePositiveInteger,
+} = require("../utils/validation");
 const { AVAILABLE_STATUS, AVAILABLE_UNITS } = require("../services/products.service");
-
-function validatePositiveInteger(value, fieldLabel) {
-  const parsedValue = Number(value);
-
-  if (!Number.isInteger(parsedValue) || parsedValue <= 0) {
-    throw new HttpError(`${fieldLabel} deve ser um numero inteiro positivo`, 400);
-  }
-}
-
-function validateNonNegativeNumber(value, fieldLabel) {
-  const parsedValue = Number(value);
-
-  if (!Number.isFinite(parsedValue) || parsedValue < 0) {
-    throw new HttpError(`${fieldLabel} deve ser um numero maior ou igual a zero`, 400);
-  }
-}
-
-function validateBooleanField(value, fieldLabel) {
-  if (typeof value !== "boolean") {
-    throw new HttpError(`${fieldLabel} deve ser booleano`, 400);
-  }
-}
-
-function isValidDateString(value) {
-  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value.trim())) {
-    return false;
-  }
-
-  const parsedDate = new Date(`${value}T00:00:00`);
-  return !Number.isNaN(parsedDate.getTime());
-}
 
 function validateProductIdParam(req, res, next) {
   const productId = Number(req.params.id);
@@ -44,16 +20,7 @@ function validateProductIdParam(req, res, next) {
 
 function validateListProductsQuery(req, res, next) {
   try {
-    const page = req.query.page ? Number(req.query.page) : 1;
-    const limit = req.query.limit ? Number(req.query.limit) : 10;
-
-    if (!Number.isInteger(page) || page <= 0) {
-      throw new HttpError("O parametro page deve ser um numero inteiro positivo", 400);
-    }
-
-    if (!Number.isInteger(limit) || limit <= 0 || limit > 100) {
-      throw new HttpError("O parametro limit deve estar entre 1 e 100", 400);
-    }
+    validatePaginationQuery(req.query.page, req.query.limit);
 
     if (req.query.categoria_id) {
       validatePositiveInteger(req.query.categoria_id, "O filtro categoria_id");

@@ -1,30 +1,14 @@
 import { request } from "./apiClient.js";
+import { buildQueryString } from "../../utils/queryParams.js";
 
 function buildUsersQuery(filters = {}) {
-  const params = new URLSearchParams();
-
-  if (filters.page) {
-    params.set("page", String(filters.page));
-  }
-
-  if (filters.limit) {
-    params.set("limit", String(filters.limit));
-  }
-
-  if (filters.search) {
-    params.set("search", filters.search);
-  }
-
-  if (filters.perfil) {
-    params.set("perfil", filters.perfil);
-  }
-
-  if (filters.status) {
-    params.set("status", filters.status);
-  }
-
-  const queryString = params.toString();
-  return queryString ? `?${queryString}` : "";
+  return buildQueryString({
+    page: filters.page,
+    limit: filters.limit,
+    search: filters.search,
+    perfil: filters.perfil,
+    status: filters.status,
+  });
 }
 
 export function fetchUsers(filters) {

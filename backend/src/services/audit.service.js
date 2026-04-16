@@ -1,17 +1,10 @@
+const { env } = require("../config/env");
 const { getAuditMetrics, insertAuditLog, listAuditLogs } = require("../repositories/audit.repository");
+const { normalizeOptionalText } = require("../utils/sanitize");
 
 const AUDIT_RESULTS = ["sucesso", "falha"];
 const AUDIT_CRITICALITY = ["baixa", "media", "alta", "critica"];
 const SENSITIVE_KEY_PATTERN = /(senha|password|senha_hash|token|authorization|cookie|secret|jwt)/i;
-
-function normalizeOptionalText(value) {
-  if (value === undefined || value === null) {
-    return null;
-  }
-
-  const normalizedValue = String(value).trim();
-  return normalizedValue ? normalizedValue : null;
-}
 
 function sanitizeAuditData(value) {
   if (value === undefined) {
@@ -125,7 +118,7 @@ async function registerAuditEventSafe(executor, payload) {
   try {
     return await registerAuditEvent(executor, payload);
   } catch (error) {
-    if (process.env.NODE_ENV !== "test") {
+    if (env.nodeEnv !== "test") {
       console.error("Falha ao registrar auditoria", error);
     }
 

@@ -1,26 +1,12 @@
 import { request } from "./apiClient.js";
+import { buildQueryString } from "../../utils/queryParams.js";
 
 const STOCK_FETCH_LIMIT = 200;
 const REFERENCE_FETCH_LIMIT = 200;
 
-function buildQuery(filters = {}) {
-  const params = new URLSearchParams();
-
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value === undefined || value === null || value === "") {
-      return;
-    }
-
-    params.set(key, String(value));
-  });
-
-  const queryString = params.toString();
-  return queryString ? `?${queryString}` : "";
-}
-
 export function fetchStockProducts(filters = {}) {
   return request(
-    `/produtos${buildQuery({
+    `/produtos${buildQueryString({
       page: 1,
       limit: filters.limit || STOCK_FETCH_LIMIT,
       search: filters.search,
@@ -36,7 +22,7 @@ export function fetchStockProducts(filters = {}) {
 
 export function fetchStockCategories() {
   return request(
-    `/categorias${buildQuery({
+    `/categorias${buildQueryString({
       page: 1,
       limit: REFERENCE_FETCH_LIMIT,
       status: "ativo",
@@ -46,7 +32,7 @@ export function fetchStockCategories() {
 
 export function fetchStockSubcategories() {
   return request(
-    `/subcategorias${buildQuery({
+    `/subcategorias${buildQueryString({
       page: 1,
       limit: REFERENCE_FETCH_LIMIT,
       status: "ativo",
@@ -56,7 +42,7 @@ export function fetchStockSubcategories() {
 
 export function fetchProductStockHistory(productId, filters = {}) {
   return request(
-    `/estoque/produtos/${productId}/historico${buildQuery({
+    `/estoque/produtos/${productId}/historico${buildQueryString({
       page: filters.page || 1,
       limit: filters.limit || 20,
       tipo: filters.tipo,

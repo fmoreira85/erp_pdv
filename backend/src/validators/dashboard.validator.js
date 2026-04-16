@@ -1,15 +1,7 @@
 const { HttpError } = require("../utils/httpError");
+const { isValidDateString } = require("../utils/validation");
 
 const DASHBOARD_PERIODS = ["hoje", "semana", "mes", "ano", "personalizado"];
-
-function isValidDateString(value) {
-  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value.trim())) {
-    return false;
-  }
-
-  const parsedDate = new Date(`${value}T00:00:00`);
-  return !Number.isNaN(parsedDate.getTime());
-}
 
 function validateDashboardSummaryQuery(req, res, next) {
   try {

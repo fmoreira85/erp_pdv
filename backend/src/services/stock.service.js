@@ -1,4 +1,5 @@
 const { HttpError } = require("../utils/httpError");
+const { normalizeOptionalNumber, normalizeOptionalText } = require("../utils/sanitize");
 const {
   pool,
   createStockRecord,
@@ -37,23 +38,6 @@ const MOVEMENT_DEFINITIONS = {
   reserva_encomenda: { type: "saida", dbType: "reserva_encomenda", defaultOrigin: "encomenda" },
   liberacao_encomenda: { type: "entrada", dbType: "liberacao_encomenda", defaultOrigin: "encomenda" },
 };
-
-function normalizeOptionalText(value) {
-  if (value === undefined || value === null) {
-    return null;
-  }
-
-  const normalizedValue = String(value).trim();
-  return normalizedValue ? normalizedValue : null;
-}
-
-function normalizeOptionalNumber(value) {
-  if (value === undefined || value === null || value === "") {
-    return null;
-  }
-
-  return Number(value);
-}
 
 function normalizeOptionalDate(value) {
   if (value === undefined || value === null || value === "") {

@@ -1,5 +1,6 @@
 import { request } from "./apiClient.js";
 import { fetchUsers } from "./users.api.js";
+import { buildQueryString } from "../../utils/queryParams.js";
 
 const REPORT_ENDPOINTS = {
   historico_caixas: "/relatorios/caixa/historico",
@@ -11,28 +12,13 @@ const REPORT_ENDPOINTS = {
   auditoria_estoque: "/relatorios/caixa/auditoria/estoque",
 };
 
-function buildQuery(filters = {}) {
-  const searchParams = new URLSearchParams();
-
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value === undefined || value === null || value === "") {
-      return;
-    }
-
-    searchParams.set(key, String(value));
-  });
-
-  const queryString = searchParams.toString();
-  return queryString ? `?${queryString}` : "";
-}
-
 export function fetchReportsOverview(filters = {}) {
-  return request(`/relatorios/caixa${buildQuery(filters)}`);
+  return request(`/relatorios/caixa${buildQueryString(filters)}`);
 }
 
 export function fetchReportByType(reportType, filters = {}) {
   const endpoint = REPORT_ENDPOINTS[reportType] || REPORT_ENDPOINTS.historico_caixas;
-  return request(`${endpoint}${buildQuery(filters)}`);
+  return request(`${endpoint}${buildQueryString(filters)}`);
 }
 
 export async function fetchReportDataset(reportType, filters = {}) {

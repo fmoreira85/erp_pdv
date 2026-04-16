@@ -1,19 +1,5 @@
 import { request } from "./apiClient.js";
-
-function buildQuery(params = {}) {
-  const searchParams = new URLSearchParams();
-
-  Object.entries(params).forEach(([key, value]) => {
-    if (value === undefined || value === null || value === "") {
-      return;
-    }
-
-    searchParams.set(key, String(value));
-  });
-
-  const queryString = searchParams.toString();
-  return queryString ? `?${queryString}` : "";
-}
+import { buildQueryString } from "../../utils/queryParams.js";
 
 function buildPeriodQuery(filters = {}) {
   return {
@@ -24,20 +10,20 @@ function buildPeriodQuery(filters = {}) {
 }
 
 export function fetchDashboardSummary(filters = {}) {
-  return request(`/dashboard/resumo${buildQuery(buildPeriodQuery(filters))}`);
+  return request(`/dashboard/resumo${buildQueryString(buildPeriodQuery(filters))}`);
 }
 
 export function fetchDashboardCashOverview(filters = {}) {
-  return request(`/relatorios/caixa${buildQuery(buildPeriodQuery(filters))}`);
+  return request(`/relatorios/caixa${buildQueryString(buildPeriodQuery(filters))}`);
 }
 
 export function fetchDashboardCashPaymentMethods(filters = {}) {
-  return request(`/relatorios/caixa/formas-pagamento${buildQuery(buildPeriodQuery(filters))}`);
+  return request(`/relatorios/caixa/formas-pagamento${buildQueryString(buildPeriodQuery(filters))}`);
 }
 
 export function fetchDashboardCashDivergences(filters = {}) {
   return request(
-    `/relatorios/caixa/divergencias${buildQuery({
+    `/relatorios/caixa/divergencias${buildQueryString({
       ...buildPeriodQuery(filters),
       limit: filters.limit || 5,
     })}`
@@ -50,7 +36,7 @@ export function fetchDashboardClientsFinancialStatus() {
 
 export function fetchDashboardLossesReport(filters = {}) {
   return request(
-    `/perdas/relatorio${buildQuery({
+    `/perdas/relatorio${buildQueryString({
       group_by: "motivo",
       ...buildPeriodQuery(filters),
     })}`
@@ -59,7 +45,7 @@ export function fetchDashboardLossesReport(filters = {}) {
 
 export function fetchDashboardInventorySnapshot() {
   return request(
-    `/produtos${buildQuery({
+    `/produtos${buildQueryString({
       page: 1,
       limit: 100,
       status: "ativo",
@@ -69,7 +55,7 @@ export function fetchDashboardInventorySnapshot() {
 
 export function fetchDashboardExpiringProducts() {
   return request(
-    `/produtos${buildQuery({
+    `/produtos${buildQueryString({
       page: 1,
       limit: 100,
       status: "ativo",
