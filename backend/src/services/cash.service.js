@@ -27,7 +27,67 @@ function calculateExpectedValue(cash) {
   return roundMoney(Number(cash.valor_inicial || 0) + Number(cash.valor_entradas || 0) - Number(cash.valor_saidas || 0));
 }
 
+function classifyCashDifference(difference) {
+  const normalizedDifference = roundMoney(difference);
+
+  if (normalizedDifference > 0) {
+    return "sobra";
+  }
+
+  if (normalizedDifference < 0) {
+    return "falta";
+  }
+
+  return "sem_diferenca";
+}
+
+function getPaymentBuckets(paymentMethods = []) {
+  return paymentMethods.reduce(
+    (accumulator, paymentMethod) => {
+      const normalizedName = String(paymentMethod.nome || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+
+      const grossValue = Number(paymentMethod.total_bruto || 0);
+      const netValue = Number(paymentMethod.total_liquido || 0);
+
+      if (normalizedName.includes("dinheiro")) {
+        accumulator.total_dinheiro += netValue;
+        return accumulator;
+      }
+
+      if (normalizedName.includes("pix")) {
+        accumulator.total_pix += netValue;
+        return accumulator;
+      }
+
+      if (normalizedName.includes("cart")) {
+        accumulator.total_cartao += netValue;
+        return accumulator;
+      }
+
+      if (normalizedName.includes("fiado")) {
+        accumulator.total_fiado += grossValue;
+        return accumulator;
+      }
+
+      accumulator.total_outros += netValue;
+      return accumulator;
+    },
+    {
+      total_dinheiro: 0,
+      total_pix: 0,
+      total_cartao: 0,
+      total_fiado: 0,
+      total_outros: 0,
+    }
+  );
+}
+
 function mapCashResponse(cash, summary = null) {
+  const difference = cash.diferenca !== null ? Number(cash.diferenca) : null;
+
   return {
     id: cash.id,
     estacao: cash.estacao,
@@ -54,7 +114,8 @@ function mapCashResponse(cash, summary = null) {
       valor_saidas: Number(cash.valor_saidas),
       valor_esperado: Number(cash.valor_esperado),
       valor_informado: cash.valor_informado !== null ? Number(cash.valor_informado) : null,
-      diferenca: cash.diferenca !== null ? Number(cash.diferenca) : null,
+      diferenca: difference,
+      tipo_diferenca: difference !== null ? classifyCashDifference(difference) : null,
     },
     created_at: cash.created_at,
     updated_at: cash.updated_at,
@@ -118,19 +179,33 @@ function ensureCashManagerPermission(cash, authenticatedUser) {
   }
 }
 
-async function buildCashSummary(cashId) {
-  const cash = await findCashById(null, cashId);
+async function buildCashSummary(cashId, executor = null) {
+  const cash = await findCashById(executor, cashId);
 
   if (!cash) {
     throw new HttpError("Caixa nao encontrado", 404);
   }
 
   const [movementStats, paymentMethods, salesStats, expenseStats] = await Promise.all([
-    getCashMovementStats(null, cashId),
-    getCashPaymentMethodStats(null, cashId),
-    getCashSalesStats(null, cashId),
-    getCashExpenseStats(null, cashId),
+    getCashMovementStats(executor, cashId),
+    getCashPaymentMethodStats(executor, cashId),
+    getCashSalesStats(executor, cashId),
+    getCashExpenseStats(executor, cashId),
   ]);
+
+  const normalizedPaymentMethods = paymentMethods.map((payment) => ({
+    id: payment.id,
+    nome: payment.nome,
+    aceita_troco: Boolean(payment.aceita_troco),
+    gera_conta_receber: Boolean(payment.gera_conta_receber),
+    total_registros: Number(payment.total_registros || 0),
+    total_bruto: Number(payment.total_bruto || 0),
+    total_taxas: Number(payment.total_taxas || 0),
+    total_liquido: Number(payment.total_liquido || 0),
+  }));
+
+  const paymentBuckets = getPaymentBuckets(normalizedPaymentMethods);
+  const difference = cash.diferenca !== null ? Number(cash.diferenca) : null;
 
   return {
     dinheiro_fisico: {
@@ -158,16 +233,25 @@ async function buildCashSummary(cashId) {
       total_despesas: Number(expenseStats?.total_despesas || 0),
       total_valor: Number(expenseStats?.total_despesas_valor || 0),
     },
-    formas_pagamento: paymentMethods.map((payment) => ({
-      id: payment.id,
-      nome: payment.nome,
-      aceita_troco: Boolean(payment.aceita_troco),
-      gera_conta_receber: Boolean(payment.gera_conta_receber),
-      total_registros: Number(payment.total_registros || 0),
-      total_bruto: Number(payment.total_bruto || 0),
-      total_taxas: Number(payment.total_taxas || 0),
-      total_liquido: Number(payment.total_liquido || 0),
-    })),
+    formas_pagamento: normalizedPaymentMethods,
+    fechamento: {
+      caixa_id: cash.id,
+      valor_inicial: Number(cash.valor_inicial),
+      total_dinheiro: roundMoney(paymentBuckets.total_dinheiro),
+      total_pix: roundMoney(paymentBuckets.total_pix),
+      total_cartao: roundMoney(paymentBuckets.total_cartao),
+      total_fiado: roundMoney(paymentBuckets.total_fiado),
+      total_outros: roundMoney(paymentBuckets.total_outros),
+      total_despesas: Number(expenseStats?.total_despesas_valor || 0),
+      total_sangrias: Number(movementStats?.total_sangrias || 0),
+      valor_esperado: calculateExpectedValue(cash),
+      valor_informado: cash.valor_informado !== null ? Number(cash.valor_informado) : null,
+      diferenca: difference,
+      tipo_diferenca: difference !== null ? classifyCashDifference(difference) : null,
+      usuario_fechamento_id: cash.usuario_fechamento_id || null,
+      data_fechamento: cash.data_fechamento || null,
+      justificativa: cash.observacao_fechamento || null,
+    },
   };
 }
 
@@ -432,7 +516,8 @@ async function closeCash(cashId, payload, authenticatedUser, auditMetadata = nul
       throw new HttpError("Justificativa e obrigatoria quando houver divergencia no fechamento", 400);
     }
 
-    const status = difference === 0 ? "fechado" : "divergente";
+    const differenceType = classifyCashDifference(difference);
+    const status = differenceType === "sem_diferenca" ? "fechado" : "divergente";
 
     await closeCashSession(connection, cashId, {
       usuarioFechamentoId: authenticatedUser.id,
@@ -444,6 +529,7 @@ async function closeCash(cashId, payload, authenticatedUser, auditMetadata = nul
     });
 
     const closedCash = await findCashById(connection, cashId);
+    const closingSummary = await buildCashSummary(cashId, connection);
 
     await registerCashAudit(connection, {
       userId: authenticatedUser.id,
@@ -454,14 +540,15 @@ async function closeCash(cashId, payload, authenticatedUser, auditMetadata = nul
       },
       after: {
         caixa: mapCashForAudit(closedCash),
+        fechamento: closingSummary.fechamento,
       },
       metadata: auditMetadata,
-      observation: `Caixa ${cashId} fechado com status ${status}`,
+      observation: `Caixa ${cashId} fechado com status ${status} e tipo ${differenceType}`,
     });
 
     await connection.commit();
 
-    return mapCashResponse(closedCash, await buildCashSummary(cashId));
+    return mapCashResponse(closedCash, closingSummary);
   } catch (error) {
     await connection.rollback();
     throw error;
@@ -517,6 +604,7 @@ module.exports = {
   CASH_MOVEMENT_TYPES,
   CASH_MOVEMENT_NATURES,
   calculateExpectedValue,
+  classifyCashDifference,
   openCashSession,
   getCurrentCashSession,
   getCashSessionById,

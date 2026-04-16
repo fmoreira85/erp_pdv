@@ -5,6 +5,10 @@ function mapCashForAudit(cash) {
     return null;
   }
 
+  const difference = cash.diferenca !== null ? Number(cash.diferenca || 0) : null;
+  const differenceType =
+    difference === null ? null : difference > 0 ? "sobra" : difference < 0 ? "falta" : "sem_diferenca";
+
   return {
     id: cash.id,
     usuario_abertura_id: cash.usuario_abertura_id || null,
@@ -18,7 +22,8 @@ function mapCashForAudit(cash) {
     valor_saidas: Number(cash.valor_saidas || 0),
     valor_esperado: Number(cash.valor_esperado || 0),
     valor_informado: cash.valor_informado !== null ? Number(cash.valor_informado || 0) : null,
-    diferenca: cash.diferenca !== null ? Number(cash.diferenca || 0) : null,
+    diferenca: difference,
+    tipo_diferenca: differenceType,
     observacao_abertura: cash.observacao_abertura || null,
     observacao_fechamento: cash.observacao_fechamento || null,
   };
