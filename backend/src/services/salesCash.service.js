@@ -1,5 +1,9 @@
-const { applyCashTotalsDelta, findCashByIdForUpdate, insertCashMovement } = require("../repositories/sales.repository");
+const { applyCashTotalsDelta, findCashByIdForUpdate, insertCashMovement } = require("../repositories/cash.repository");
 const { HttpError } = require("../utils/httpError");
+
+function isPhysicalCashPayment(payment) {
+  return Boolean(payment.aceitaTroco || payment.aceita_troco);
+}
 
 async function ensureCashIsOpen(executor, cashId) {
   const cash = await findCashByIdForUpdate(executor, cashId);
@@ -21,8 +25,6 @@ async function registerSaleCashMovements(executor, sale, payments, userId) {
   let entryDelta = 0;
 
   for (const payment of payments.filter((item) => !item.geraContaReceber)) {
-    entryDelta += Number(payment.valorLiquido);
-
     await insertCashMovement(executor, {
       caixaId: sale.caixa_id,
       usuarioId: userId,
@@ -33,6 +35,10 @@ async function registerSaleCashMovements(executor, sale, payments, userId) {
       valor: payment.valorLiquido,
       descricao: `Recebimento da venda ${sale.numero_venda} via ${payment.formaPagamentoNome}`,
     });
+
+    if (isPhysicalCashPayment(payment)) {
+      entryDelta += Number(payment.valorLiquido);
+    }
   }
 
   if (entryDelta > 0) {
@@ -50,8 +56,6 @@ async function reverseSaleCashMovements(executor, sale, payments, userId, reason
   let outputDelta = 0;
 
   for (const payment of payments.filter((item) => !Boolean(item.gera_conta_receber || item.geraContaReceber))) {
-    outputDelta += Number(payment.valor_liquido || payment.valorLiquido || 0);
-
     await insertCashMovement(executor, {
       caixaId: sale.caixa_id,
       usuarioId: userId,
@@ -62,6 +66,10 @@ async function reverseSaleCashMovements(executor, sale, payments, userId, reason
       valor: Number(payment.valor_liquido || payment.valorLiquido || 0),
       descricao: `Estorno da venda ${sale.numero_venda}: ${reason}`,
     });
+
+    if (isPhysicalCashPayment(payment)) {
+      outputDelta += Number(payment.valor_liquido || payment.valorLiquido || 0);
+    }
   }
 
   if (outputDelta > 0) {

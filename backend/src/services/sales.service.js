@@ -4,7 +4,6 @@ const {
   createSale,
   findClientForSale,
   findAccountsReceivableBySaleId,
-  findOpenCashByUserId,
   findPaymentMethodsByIds,
   findProductsForSale,
   findSaleById,
@@ -18,6 +17,7 @@ const {
   updateSaleDraft,
   insertSalePayments,
 } = require("../repositories/sales.repository");
+const { findOpenCashByUserId } = require("../repositories/cash.repository");
 const { HttpError } = require("../utils/httpError");
 const {
   buildPaymentsSummary,

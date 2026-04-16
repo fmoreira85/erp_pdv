@@ -241,7 +241,7 @@ CREATE TABLE caixa (
     usuario_abertura_id BIGINT UNSIGNED NOT NULL,
     usuario_fechamento_id BIGINT UNSIGNED NULL,
     estacao VARCHAR(50) NULL,
-    status ENUM('aberto', 'fechado', 'cancelado') NOT NULL DEFAULT 'aberto',
+    status ENUM('aberto', 'fechado', 'divergente', 'cancelado') NOT NULL DEFAULT 'aberto',
     data_abertura DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     data_fechamento DATETIME NULL,
     valor_inicial DECIMAL(12,2) NOT NULL DEFAULT 0.00,
