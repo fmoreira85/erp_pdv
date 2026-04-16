@@ -11,13 +11,13 @@ const {
   getCashStockAuditReport,
 } = require("../controllers/cashReports.controller");
 const { authMiddleware } = require("../middlewares/auth.middleware");
-const { authorizeRoles } = require("../middlewares/authorize.middleware");
+const { authorizeModuleAction } = require("../middlewares/authorize.middleware");
 const { asyncHandler } = require("../utils/asyncHandler");
 const { validateReportQuery } = require("../validators/cashReports.validator");
 
 const router = express.Router();
 
-router.use(authMiddleware, authorizeRoles("admin"));
+router.use(authMiddleware, authorizeModuleAction("relatorios", "view"));
 
 router.get("/caixa", validateReportQuery, asyncHandler(getCashOverview));
 router.get("/caixa/historico", validateReportQuery, asyncHandler(getCashHistoryReport));

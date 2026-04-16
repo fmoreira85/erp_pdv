@@ -11,7 +11,7 @@ const {
   updateStatus,
 } = require("../controllers/clients.controller");
 const { authMiddleware } = require("../middlewares/auth.middleware");
-const { authorizeRoles } = require("../middlewares/authorize.middleware");
+const { authorizeModuleAction } = require("../middlewares/authorize.middleware");
 const { asyncHandler } = require("../utils/asyncHandler");
 const {
   validateClientIdParam,
@@ -27,51 +27,51 @@ router.use(authMiddleware);
 
 router.get(
   "/",
-  authorizeRoles("admin", "funcionario_operacional", "funcionario_pdv"),
+  authorizeModuleAction("clientes", "view"),
   validateListClientsQuery,
   asyncHandler(list)
 );
 router.get(
   "/status-financeiro",
-  authorizeRoles("admin", "funcionario_operacional"),
+  authorizeModuleAction("clientes", "view"),
   validateListClientsQuery,
   asyncHandler(getFinancialStatusOverview)
 );
 router.get(
   "/:id/resumo-financeiro",
-  authorizeRoles("admin", "funcionario_operacional", "funcionario_pdv"),
+  authorizeModuleAction("clientes", "view"),
   validateClientIdParam,
   asyncHandler(getFinancialSummary)
 );
 router.get(
   "/:id",
-  authorizeRoles("admin", "funcionario_operacional", "funcionario_pdv"),
+  authorizeModuleAction("clientes", "view"),
   validateClientIdParam,
   asyncHandler(getById)
 );
 router.post(
   "/",
-  authorizeRoles("admin", "funcionario_operacional"),
+  authorizeModuleAction("clientes", "create"),
   validateCreateClientRequest,
   asyncHandler(create)
 );
 router.put(
   "/:id",
-  authorizeRoles("admin", "funcionario_operacional"),
+  authorizeModuleAction("clientes", "update"),
   validateClientIdParam,
   validateUpdateClientRequest,
   asyncHandler(update)
 );
 router.patch(
   "/:id/status",
-  authorizeRoles("admin", "funcionario_operacional"),
+  authorizeModuleAction("clientes", "update"),
   validateClientIdParam,
   validateUpdateClientStatusRequest,
   asyncHandler(updateStatus)
 );
 router.delete(
   "/:id",
-  authorizeRoles("admin", "funcionario_operacional"),
+  authorizeModuleAction("clientes", "delete"),
   validateClientIdParam,
   asyncHandler(remove)
 );

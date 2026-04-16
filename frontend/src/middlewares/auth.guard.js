@@ -1,5 +1,5 @@
 import { appStore } from "../scripts/state/store.js";
-import { getDefaultRouteForProfile } from "../utils/permissions.js";
+import { getDefaultRouteForUser } from "../utils/permissions.js";
 
 export function requireAuth(route) {
   const {
@@ -22,13 +22,13 @@ export function requireAuth(route) {
 
 export function redirectIfAuthenticated() {
   const {
-    auth: { authenticated, profile },
+    auth: { authenticated, profile, user },
   } = appStore.getState();
 
   if (authenticated) {
     return {
       allow: false,
-      redirectTo: getDefaultRouteForProfile(profile),
+      redirectTo: getDefaultRouteForUser(user, profile),
     };
   }
 

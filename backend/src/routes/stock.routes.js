@@ -11,7 +11,7 @@ const {
   listProductHistory,
 } = require("../controllers/stockMovements.controller");
 const { authMiddleware } = require("../middlewares/auth.middleware");
-const { authorizeRoles } = require("../middlewares/authorize.middleware");
+const { authorizeModuleAction } = require("../middlewares/authorize.middleware");
 const { asyncHandler } = require("../utils/asyncHandler");
 const {
   validateAdjustmentMovementRequest,
@@ -25,21 +25,23 @@ const {
 
 const router = express.Router();
 
-router.use(authMiddleware, authorizeRoles("admin", "funcionario_operacional"));
+router.use(authMiddleware);
 
-router.get("/", asyncHandler(getStockArea));
-router.get("/movimentacoes", validateListStockMovementsQuery, asyncHandler(list));
-router.get("/movimentacoes/:id", validateMovementIdParam, asyncHandler(getById));
-router.post("/movimentacoes", validateCreateStockMovementRequest, asyncHandler(create));
-router.post("/movimentacoes/perda", validateLossMovementRequest, asyncHandler(createLoss));
-router.post("/movimentacoes/ajuste", validateAdjustmentMovementRequest, asyncHandler(createAdjustment));
+router.get("/", authorizeModuleAction("estoque", "view"), asyncHandler(getStockArea));
+router.get("/movimentacoes", authorizeModuleAction("estoque", "view"), validateListStockMovementsQuery, asyncHandler(list));
+router.get("/movimentacoes/:id", authorizeModuleAction("estoque", "view"), validateMovementIdParam, asyncHandler(getById));
+router.post("/movimentacoes", authorizeModuleAction("estoque", "create"), validateCreateStockMovementRequest, asyncHandler(create));
+router.post("/movimentacoes/perda", authorizeModuleAction("perdas", "create"), validateLossMovementRequest, asyncHandler(createLoss));
+router.post("/movimentacoes/ajuste", authorizeModuleAction("estoque", "update"), validateAdjustmentMovementRequest, asyncHandler(createAdjustment));
 router.post(
   "/movimentacoes/devolucao-fornecedor",
+  authorizeModuleAction("estoque", "update"),
   validateSupplierReturnMovementRequest,
   asyncHandler(createSupplierReturn)
 );
 router.get(
   "/produtos/:produtoId/historico",
+  authorizeModuleAction("estoque", "view"),
   validateProductHistoryParam,
   validateListStockMovementsQuery,
   asyncHandler(listProductHistory)

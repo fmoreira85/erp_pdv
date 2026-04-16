@@ -1,5 +1,6 @@
 const { HttpError } = require("../utils/httpError");
 const { verifyToken } = require("../utils/jwt");
+const { buildAuthorizationContext } = require("../utils/permissions");
 
 function extractBearerToken(authorizationHeader = "") {
   if (!authorizationHeader.startsWith("Bearer ")) {
@@ -19,12 +20,16 @@ function authMiddleware(req, res, next) {
 
   try {
     const decoded = verifyToken(token);
+    const authorization = buildAuthorizationContext(decoded.perfil);
 
     req.user = {
       id: Number(decoded.sub),
       login: decoded.login,
       email: decoded.email,
       perfil: decoded.perfil,
+      rota_inicial: authorization.rota_inicial,
+      modulos: authorization.modulos,
+      permissoes: authorization.permissoes,
     };
 
     return next();

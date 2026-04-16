@@ -9,7 +9,7 @@ const {
   updateStatus,
 } = require("../controllers/suppliers.controller");
 const { authMiddleware } = require("../middlewares/auth.middleware");
-const { authorizeRoles } = require("../middlewares/authorize.middleware");
+const { authorizeModuleAction } = require("../middlewares/authorize.middleware");
 const { asyncHandler } = require("../utils/asyncHandler");
 const {
   validateCreateSupplierRequest,
@@ -21,18 +21,19 @@ const {
 
 const router = express.Router();
 
-router.use(authMiddleware, authorizeRoles("admin", "funcionario_compras"));
+router.use(authMiddleware);
 
-router.get("/", validateListSuppliersQuery, asyncHandler(list));
-router.get("/:id", validateSupplierIdParam, asyncHandler(getById));
-router.post("/", validateCreateSupplierRequest, asyncHandler(create));
-router.put("/:id", validateSupplierIdParam, validateUpdateSupplierRequest, asyncHandler(update));
+router.get("/", authorizeModuleAction("fornecedores", "view"), validateListSuppliersQuery, asyncHandler(list));
+router.get("/:id", authorizeModuleAction("fornecedores", "view"), validateSupplierIdParam, asyncHandler(getById));
+router.post("/", authorizeModuleAction("fornecedores", "create"), validateCreateSupplierRequest, asyncHandler(create));
+router.put("/:id", authorizeModuleAction("fornecedores", "update"), validateSupplierIdParam, validateUpdateSupplierRequest, asyncHandler(update));
 router.patch(
   "/:id/status",
+  authorizeModuleAction("fornecedores", "update"),
   validateSupplierIdParam,
   validateUpdateSupplierStatusRequest,
   asyncHandler(updateStatus)
 );
-router.delete("/:id", validateSupplierIdParam, asyncHandler(remove));
+router.delete("/:id", authorizeModuleAction("fornecedores", "delete"), validateSupplierIdParam, asyncHandler(remove));
 
 module.exports = router;

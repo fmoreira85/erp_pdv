@@ -9,7 +9,7 @@ const {
   updateStatus,
 } = require("../controllers/users.controller");
 const { authMiddleware } = require("../middlewares/auth.middleware");
-const { authorizeRoles } = require("../middlewares/authorize.middleware");
+const { authorizeModuleAction } = require("../middlewares/authorize.middleware");
 const { asyncHandler } = require("../utils/asyncHandler");
 const {
   validateCreateUserRequest,
@@ -21,18 +21,19 @@ const {
 
 const router = express.Router();
 
-router.use(authMiddleware, authorizeRoles("admin"));
+router.use(authMiddleware);
 
-router.get("/", validateListUsersQuery, asyncHandler(list));
-router.get("/:id", validateUserIdParam, asyncHandler(getById));
-router.post("/", validateCreateUserRequest, asyncHandler(create));
-router.put("/:id", validateUserIdParam, validateUpdateUserRequest, asyncHandler(update));
+router.get("/", authorizeModuleAction("usuarios", "view"), validateListUsersQuery, asyncHandler(list));
+router.get("/:id", authorizeModuleAction("usuarios", "view"), validateUserIdParam, asyncHandler(getById));
+router.post("/", authorizeModuleAction("usuarios", "create"), validateCreateUserRequest, asyncHandler(create));
+router.put("/:id", authorizeModuleAction("usuarios", "update"), validateUserIdParam, validateUpdateUserRequest, asyncHandler(update));
 router.patch(
   "/:id/status",
+  authorizeModuleAction("usuarios", "update"),
   validateUserIdParam,
   validateUpdateUserStatusRequest,
   asyncHandler(updateStatus)
 );
-router.delete("/:id", validateUserIdParam, asyncHandler(remove));
+router.delete("/:id", authorizeModuleAction("usuarios", "delete"), validateUserIdParam, asyncHandler(remove));
 
 module.exports = router;

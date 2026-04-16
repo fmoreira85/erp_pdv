@@ -42,14 +42,14 @@ router.get(
 router.get("/:id", authorizeModuleAction("caixa", "view"), validateCashIdParam, asyncHandler(getById));
 router.post(
   "/:id/sangria",
-  authorizeModuleAction("caixa", "close"),
+  authorizeModuleAction("caixa", "withdraw"),
   validateCashIdParam,
   validateCashWithdrawalRequest,
   asyncHandler(withdrawal)
 );
 router.post(
   "/:id/ajuste",
-  authorizeModuleAction("caixa", "close"),
+  authorizeModuleAction("caixa", "adjust"),
   validateCashIdParam,
   validateCashAdjustmentRequest,
   asyncHandler(adjustment)

@@ -1,5 +1,5 @@
 import { appStore } from "../scripts/state/store.js";
-import { canAccessModule } from "../utils/permissions.js";
+import { canAccessAction } from "../utils/permissions.js";
 
 export function requireModulePermission(route) {
   if (!route.module) {
@@ -12,7 +12,7 @@ export function requireModulePermission(route) {
     auth: { user },
   } = appStore.getState();
 
-  if (!user || !canAccessModule(user, route.module, route.action || "view")) {
+  if (!user || !canAccessAction(user, route.module, route.action || "view")) {
     return {
       allow: false,
       redirectTo: "forbidden",

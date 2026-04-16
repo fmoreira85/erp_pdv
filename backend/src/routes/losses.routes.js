@@ -8,7 +8,7 @@ const {
   report,
 } = require("../controllers/losses.controller");
 const { authMiddleware } = require("../middlewares/auth.middleware");
-const { authorizeRoles } = require("../middlewares/authorize.middleware");
+const { authorizeModuleAction } = require("../middlewares/authorize.middleware");
 const { asyncHandler } = require("../utils/asyncHandler");
 const {
   validateCreateLossRequest,
@@ -20,12 +20,12 @@ const {
 
 const router = express.Router();
 
-router.use(authMiddleware, authorizeRoles("admin", "funcionario_operacional"));
+router.use(authMiddleware);
 
-router.get("/", validateListLossesQuery, asyncHandler(list));
-router.get("/relatorio", validateLossesReportQuery, asyncHandler(report));
-router.get("/produto/:produtoId", validateLossProductParam, validateListLossesQuery, asyncHandler(listByProduct));
-router.get("/:id", validateLossIdParam, asyncHandler(getById));
-router.post("/", validateCreateLossRequest, asyncHandler(create));
+router.get("/", authorizeModuleAction("perdas", "view"), validateListLossesQuery, asyncHandler(list));
+router.get("/relatorio", authorizeModuleAction("perdas", "view"), validateLossesReportQuery, asyncHandler(report));
+router.get("/produto/:produtoId", authorizeModuleAction("perdas", "view"), validateLossProductParam, validateListLossesQuery, asyncHandler(listByProduct));
+router.get("/:id", authorizeModuleAction("perdas", "view"), validateLossIdParam, asyncHandler(getById));
+router.post("/", authorizeModuleAction("perdas", "create"), validateCreateLossRequest, asyncHandler(create));
 
 module.exports = router;

@@ -9,7 +9,7 @@ const {
   updateStatus,
 } = require("../controllers/products.controller");
 const { authMiddleware } = require("../middlewares/auth.middleware");
-const { authorizeRoles } = require("../middlewares/authorize.middleware");
+const { authorizeModuleAction } = require("../middlewares/authorize.middleware");
 const { asyncHandler } = require("../utils/asyncHandler");
 const {
   validateCreateProductRequest,
@@ -25,39 +25,39 @@ router.use(authMiddleware);
 
 router.get(
   "/",
-  authorizeRoles("admin", "funcionario_operacional", "funcionario_pdv"),
+  authorizeModuleAction("produtos", "view"),
   validateListProductsQuery,
   asyncHandler(list)
 );
 router.get(
   "/:id",
-  authorizeRoles("admin", "funcionario_operacional", "funcionario_pdv"),
+  authorizeModuleAction("produtos", "view"),
   validateProductIdParam,
   asyncHandler(getById)
 );
 router.post(
   "/",
-  authorizeRoles("admin", "funcionario_operacional"),
+  authorizeModuleAction("produtos", "create"),
   validateCreateProductRequest,
   asyncHandler(create)
 );
 router.put(
   "/:id",
-  authorizeRoles("admin", "funcionario_operacional"),
+  authorizeModuleAction("produtos", "update"),
   validateProductIdParam,
   validateUpdateProductRequest,
   asyncHandler(update)
 );
 router.patch(
   "/:id/status",
-  authorizeRoles("admin", "funcionario_operacional"),
+  authorizeModuleAction("produtos", "update"),
   validateProductIdParam,
   validateUpdateProductStatusRequest,
   asyncHandler(updateStatus)
 );
 router.delete(
   "/:id",
-  authorizeRoles("admin", "funcionario_operacional"),
+  authorizeModuleAction("produtos", "delete"),
   validateProductIdParam,
   asyncHandler(remove)
 );

@@ -1,6 +1,6 @@
 import { loginRequest, fetchCurrentSession } from "../api/auth.api.js";
 import { appStore } from "../state/store.js";
-import { getDefaultRouteForProfile } from "../../utils/permissions.js";
+import { getDefaultRouteForUser } from "../../utils/permissions.js";
 
 export async function initializeSession() {
   const {
@@ -69,8 +69,8 @@ export function getPostLoginRoute() {
   }
 
   const {
-    auth: { profile },
+    auth: { profile, user },
   } = appStore.getState();
 
-  return getDefaultRouteForProfile(profile);
+  return getDefaultRouteForUser(user, profile);
 }

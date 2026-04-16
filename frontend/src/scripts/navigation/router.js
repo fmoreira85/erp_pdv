@@ -1,6 +1,6 @@
 import { renderApplicationShell } from "../app/layout.js";
 import { appStore } from "../state/store.js";
-import { getDefaultRouteForProfile } from "../../utils/permissions.js";
+import { getDefaultRouteForUser } from "../../utils/permissions.js";
 import { appRoutes, forbiddenRoute, notFoundRoute } from "./routes.js";
 
 const contentNode = document.querySelector("#app-content");
@@ -16,10 +16,10 @@ function resolveRoute(path) {
 
 function getDefaultRoute() {
   const {
-    auth: { authenticated, profile },
+    auth: { authenticated, profile, user },
   } = appStore.getState();
 
-  return authenticated ? getDefaultRouteForProfile(profile) : "login";
+  return authenticated ? getDefaultRouteForUser(user, profile) : "login";
 }
 
 async function runGuards(route) {

@@ -1,6 +1,6 @@
 import { appStore } from "../state/store.js";
 import { appRoutes } from "../navigation/routes.js";
-import { canAccessModule } from "../../utils/permissions.js";
+import { canAccessAction } from "../../utils/permissions.js";
 
 function isRouteVisible(route, authenticated, user) {
   if (route.showInMenu === false) {
@@ -19,7 +19,7 @@ function isRouteVisible(route, authenticated, user) {
     return true;
   }
 
-  return canAccessModule(user, route.module, route.action || "view");
+  return canAccessAction(user, route.module, route.action || "view");
 }
 
 export function renderSidebar() {

@@ -6,10 +6,12 @@ const {
   updateLastLogin,
 } = require("../repositories/auth.repository");
 const { HttpError } = require("../utils/httpError");
-const { getProfilePermissions, listAllowedModules } = require("../utils/permissions");
+const { buildAuthorizationContext } = require("../utils/permissions");
 const { JWT_EXPIRES_IN, generateToken } = require("../utils/jwt");
 
 function sanitizeUser(user) {
+  const authorization = buildAuthorizationContext(user.perfil);
+
   return {
     id: user.id,
     nome: user.nome,
@@ -17,8 +19,9 @@ function sanitizeUser(user) {
     email: user.email,
     perfil: user.perfil,
     status: user.status,
-    modulos: listAllowedModules(user.perfil),
-    permissoes: getProfilePermissions(user.perfil),
+    rota_inicial: authorization.rota_inicial,
+    modulos: authorization.modulos,
+    permissoes: authorization.permissoes,
   };
 }
 
