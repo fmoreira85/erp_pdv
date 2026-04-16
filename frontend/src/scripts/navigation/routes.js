@@ -1,5 +1,6 @@
 import { redirectIfAuthenticated, requireAuth } from "../../middlewares/auth.guard.js";
 import { requireModulePermission } from "../../middlewares/role.guard.js";
+import { renderCashPage, setupCashPage } from "../../pages/cash/cash.page.js";
 import { renderDashboardPage, setupDashboardPage } from "../../pages/dashboard/dashboard.page.js";
 import { renderLoginPage, setupLoginPage } from "../../pages/login/login.page.js";
 import { renderPdvPage, setupPdvPage } from "../../pages/pdv/pdv.page.js";
@@ -60,13 +61,17 @@ export const appRoutes = [
     render: renderPdvPage,
     afterRender: setupPdvPage,
   },
-  createModuleRoute(
-    "caixa",
-    "Caixa",
-    "bi-cash-stack",
-    "caixa",
-    "Abertura, fechamento, suprimento, sangria e conferencia operacional."
-  ),
+  {
+    path: "caixa",
+    title: "Caixa",
+    icon: "bi-cash-stack",
+    module: "caixa",
+    action: "view",
+    public: false,
+    guards: [requireAuth, requireModulePermission],
+    render: renderCashPage,
+    afterRender: setupCashPage,
+  },
   createModuleRoute(
     "produtos",
     "Produtos",
