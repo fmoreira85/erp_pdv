@@ -26,6 +26,7 @@ const {
   roundMoney,
 } = require("./salesCalculator.service");
 const { ensureCashIsOpen, registerSaleCashMovements, reverseSaleCashMovements } = require("./salesCash.service");
+const { registerSaleCancellationAudit, registerSaleFinalizationAudit } = require("./salesAudit.service");
 const { createSaleReceivable, cancelSaleReceivable } = require("./salesReceivables.service");
 const {
   applySaleStockMovements,
@@ -387,7 +388,7 @@ async function updateDraftSale(saleId, payload) {
   }
 }
 
-async function finalizeSaleRecord(saleId, payload, authenticatedUserId) {
+async function finalizeSaleRecord(saleId, payload, authenticatedUserId, auditMetadata = null) {
   const connection = await pool.getConnection();
 
   try {
@@ -482,9 +483,19 @@ async function finalizeSaleRecord(saleId, payload, authenticatedUserId) {
     await applySaleStockMovements(connection, finalizedSale, stockItems, authenticatedUserId);
     await registerSaleCashMovements(connection, finalizedSale, paymentsSummary.payments, authenticatedUserId);
 
-    if (hasCredit) {
-      await createSaleReceivable(connection, finalizedSale, paymentsSummary.totals.totalCredit, authenticatedUserId);
-    }
+    const receivableId = hasCredit
+      ? await createSaleReceivable(connection, finalizedSale, paymentsSummary.totals.totalCredit, authenticatedUserId)
+      : null;
+
+    await registerSaleFinalizationAudit(connection, {
+      saleBefore: currentSale,
+      saleAfter: finalizedSale,
+      items: persistedItems,
+      payments: paymentsSummary.payments,
+      receivable: receivableId ? { id: receivableId, status: "aberta" } : null,
+      userId: authenticatedUserId,
+      metadata: auditMetadata,
+    });
 
     await connection.commit();
 
@@ -497,7 +508,7 @@ async function finalizeSaleRecord(saleId, payload, authenticatedUserId) {
   }
 }
 
-async function cancelSaleRecord(saleId, payload, authenticatedUserId) {
+async function cancelSaleRecord(saleId, payload, authenticatedUserId, auditMetadata = null) {
   const connection = await pool.getConnection();
 
   try {
@@ -515,6 +526,7 @@ async function cancelSaleRecord(saleId, payload, authenticatedUserId) {
 
     const items = await listSaleItems(connection, saleId);
     const payments = await listSalePayments(connection, saleId);
+    const receivableBefore = await findAccountsReceivableBySaleId(connection, saleId);
     const reason = normalizeOptionalText(payload.motivo);
 
     if (currentSale.status === "finalizada") {
@@ -537,6 +549,19 @@ async function cancelSaleRecord(saleId, payload, authenticatedUserId) {
     await markSaleAsCancelled(connection, saleId, {
       canceladaPor: authenticatedUserId,
       motivoCancelamento: reason,
+    });
+
+    const cancelledSale = await findSaleById(connection, saleId);
+
+    await registerSaleCancellationAudit(connection, {
+      saleBefore: currentSale,
+      saleAfter: cancelledSale,
+      items,
+      payments,
+      receivableBefore,
+      userId: authenticatedUserId,
+      reason,
+      metadata: auditMetadata,
     });
 
     await connection.commit();
