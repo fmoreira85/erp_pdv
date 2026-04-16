@@ -7,14 +7,8 @@ const {
   getSalesList,
   updateDraftSale,
 } = require("../services/sales.service");
+const { buildAuditMetadataFromRequest } = require("../services/audit.service");
 const { sendSuccess } = require("../utils/response");
-
-function buildAuditMetadata(req) {
-  return {
-    ip: req.ip || null,
-    userAgent: req.get("user-agent") || null,
-  };
-}
 
 async function list(req, res) {
   const data = await getSalesList(req.query);
@@ -37,12 +31,12 @@ async function update(req, res) {
 }
 
 async function finalize(req, res) {
-  const data = await finalizeSaleRecord(Number(req.params.id), req.body, req.user.id, buildAuditMetadata(req));
+  const data = await finalizeSaleRecord(Number(req.params.id), req.body, req.user.id, buildAuditMetadataFromRequest(req));
   return sendSuccess(res, data);
 }
 
 async function cancel(req, res) {
-  const data = await cancelSaleRecord(Number(req.params.id), req.body, req.user.id, buildAuditMetadata(req));
+  const data = await cancelSaleRecord(Number(req.params.id), req.body, req.user.id, buildAuditMetadataFromRequest(req));
   return sendSuccess(res, data);
 }
 

@@ -305,6 +305,7 @@ async function openCashSession(payload, authenticatedUser, auditMetadata = null)
         caixa: mapCashForAudit(openedCash),
       },
       metadata: auditMetadata,
+      criticidade: "media",
       observation: `Caixa ${cashId} aberto`,
     });
 
@@ -420,6 +421,7 @@ async function registerCashWithdrawal(cashId, payload, authenticatedUser, auditM
         },
       },
       metadata: auditMetadata,
+      criticidade: "alta",
       observation: `Sangria registrada no caixa ${cashId}`,
     });
 
@@ -483,6 +485,7 @@ async function registerCashAdjustment(cashId, payload, authenticatedUser, auditM
         },
       },
       metadata: auditMetadata,
+      criticidade: "alta",
       observation: `Ajuste registrado no caixa ${cashId}`,
     });
 
@@ -543,6 +546,7 @@ async function closeCash(cashId, payload, authenticatedUser, auditMetadata = nul
         fechamento: closingSummary.fechamento,
       },
       metadata: auditMetadata,
+      criticidade: difference === 0 ? "media" : "alta",
       observation: `Caixa ${cashId} fechado com status ${status} e tipo ${differenceType}`,
     });
 

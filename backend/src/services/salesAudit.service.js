@@ -64,6 +64,7 @@ async function registerSaleFinalizationAudit(executor, payload) {
     entidade: "vendas",
     registroId: payload.saleAfter.id,
     acao: "finalizacao",
+    descricao: `Venda ${payload.saleAfter.numero_venda} finalizada`,
     dadosAntes: {
       venda: mapSaleForAudit(payload.saleBefore),
     },
@@ -81,6 +82,11 @@ async function registerSaleFinalizationAudit(executor, payload) {
     },
     ip: payload.metadata?.ip || null,
     userAgent: payload.metadata?.userAgent || null,
+    route: payload.metadata?.route || null,
+    method: payload.metadata?.method || null,
+    profile: payload.metadata?.profile || null,
+    resultado: "sucesso",
+    criticidade: totalFiado > 0 ? "alta" : "media",
     observacao: `Venda ${payload.saleAfter.numero_venda} finalizada`,
   });
 }
@@ -92,6 +98,7 @@ async function registerSaleCancellationAudit(executor, payload) {
     entidade: "vendas",
     registroId: payload.saleAfter.id,
     acao: "cancelamento",
+    descricao: `Venda ${payload.saleAfter.numero_venda} cancelada`,
     dadosAntes: {
       venda: mapSaleForAudit(payload.saleBefore),
       pagamentos: mapPaymentsForAudit(payload.payments),
@@ -113,6 +120,11 @@ async function registerSaleCancellationAudit(executor, payload) {
     },
     ip: payload.metadata?.ip || null,
     userAgent: payload.metadata?.userAgent || null,
+    route: payload.metadata?.route || null,
+    method: payload.metadata?.method || null,
+    profile: payload.metadata?.profile || null,
+    resultado: "sucesso",
+    criticidade: "alta",
     observacao: `Venda ${payload.saleAfter.numero_venda} cancelada: ${payload.reason}`,
   });
 }

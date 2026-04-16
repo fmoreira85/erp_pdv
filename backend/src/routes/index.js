@@ -1,5 +1,6 @@
 const express = require("express");
 
+const auditRoutes = require("./audit.routes");
 const authRoutes = require("./auth.routes");
 const categoriesRoutes = require("./categories.routes");
 const cashRoutes = require("./cash.routes");
@@ -29,6 +30,7 @@ router.get("/", (req, res) => {
 });
 
 router.use("/auth", authRoutes);
+router.use("/auditoria", auditRoutes);
 router.use("/categorias", categoriesRoutes);
 router.use("/caixa", cashRoutes);
 router.use("/clientes", clientsRoutes);

@@ -36,10 +36,17 @@ async function registerCashAudit(executor, payload) {
     entidade: "caixa",
     registroId: payload.cashId,
     acao: payload.action,
+    descricao: payload.description || payload.observation || null,
     dadosAntes: payload.before || null,
     dadosDepois: payload.after || null,
     ip: payload.metadata?.ip || null,
     userAgent: payload.metadata?.userAgent || null,
+    route: payload.metadata?.route || null,
+    method: payload.metadata?.method || null,
+    profile: payload.metadata?.profile || null,
+    resultado: payload.resultado || "sucesso",
+    criticidade: payload.criticidade || "media",
+    metadados: payload.metadados || null,
     observacao: payload.observation || null,
   });
 }

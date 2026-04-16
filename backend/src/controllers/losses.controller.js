@@ -5,6 +5,7 @@ const {
   getLossesReportSummary,
   getProductLossHistory,
 } = require("../services/losses.service");
+const { buildAuditPayloadFromRequest, registerAuditEventSafe } = require("../services/audit.service");
 const { sendSuccess } = require("../utils/response");
 
 async function list(req, res) {
@@ -19,6 +20,18 @@ async function getById(req, res) {
 
 async function create(req, res) {
   const data = await createLossEntry(req.body, req.user.id);
+
+  await registerAuditEventSafe(null, buildAuditPayloadFromRequest(req, {
+    modulo: "perdas",
+    entidade: "perdas",
+    registroId: data.id,
+    acao: "criacao",
+    descricao: `Perda registrada para o produto ${data.produto.nome}`,
+    dadosDepois: data,
+    resultado: "sucesso",
+    criticidade: "alta",
+  }));
+
   return sendSuccess(res, data, 201);
 }
 

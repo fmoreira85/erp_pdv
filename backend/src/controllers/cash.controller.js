@@ -9,17 +9,11 @@ const {
   registerCashAdjustment,
   registerCashWithdrawal,
 } = require("../services/cash.service");
+const { buildAuditMetadataFromRequest } = require("../services/audit.service");
 const { sendSuccess } = require("../utils/response");
 
-function buildAuditMetadata(req) {
-  return {
-    ip: req.ip || null,
-    userAgent: req.get("user-agent") || null,
-  };
-}
-
 async function open(req, res) {
-  const data = await openCashSession(req.body, req.user, buildAuditMetadata(req));
+  const data = await openCashSession(req.body, req.user, buildAuditMetadataFromRequest(req));
   return sendSuccess(res, data, 201);
 }
 
@@ -39,12 +33,12 @@ async function list(req, res) {
 }
 
 async function withdrawal(req, res) {
-  const data = await registerCashWithdrawal(Number(req.params.id), req.body, req.user, buildAuditMetadata(req));
+  const data = await registerCashWithdrawal(Number(req.params.id), req.body, req.user, buildAuditMetadataFromRequest(req));
   return sendSuccess(res, data);
 }
 
 async function adjustment(req, res) {
-  const data = await registerCashAdjustment(Number(req.params.id), req.body, req.user, buildAuditMetadata(req));
+  const data = await registerCashAdjustment(Number(req.params.id), req.body, req.user, buildAuditMetadataFromRequest(req));
   return sendSuccess(res, data);
 }
 
@@ -54,7 +48,7 @@ async function summary(req, res) {
 }
 
 async function close(req, res) {
-  const data = await closeCash(Number(req.params.id), req.body, req.user, buildAuditMetadata(req));
+  const data = await closeCash(Number(req.params.id), req.body, req.user, buildAuditMetadataFromRequest(req));
   return sendSuccess(res, data);
 }
 
