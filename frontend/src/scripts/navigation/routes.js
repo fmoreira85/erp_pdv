@@ -4,6 +4,7 @@ import { renderCashPage, setupCashPage } from "../../pages/cash/cash.page.js";
 import { renderDashboardPage, setupDashboardPage } from "../../pages/dashboard/dashboard.page.js";
 import { renderLoginPage, setupLoginPage } from "../../pages/login/login.page.js";
 import { renderPdvPage, setupPdvPage } from "../../pages/pdv/pdv.page.js";
+import { renderReportsPage, setupReportsPage } from "../../pages/reports/reports.page.js";
 import { renderForbiddenPage } from "../../pages/shared/forbidden.page.js";
 import { renderModulePage } from "../../pages/shared/module.page.js";
 import { renderNotFoundPage } from "../../pages/shared/notFound.page.js";
@@ -118,13 +119,17 @@ export const appRoutes = [
     "despesas",
     "Lancamentos operacionais, saidas financeiras e rastreabilidade."
   ),
-  createModuleRoute(
-    "relatorios",
-    "Relatorios",
-    "bi-bar-chart-line",
-    "relatorios",
-    "Consolidacao de vendas, estoque, caixa, clientes e desempenho."
-  ),
+  {
+    path: "relatorios",
+    title: "Relatorios",
+    icon: "bi-bar-chart-line",
+    module: "relatorios",
+    action: "view",
+    public: false,
+    guards: [requireAuth, requireModulePermission],
+    render: renderReportsPage,
+    afterRender: setupReportsPage,
+  },
   createModuleRoute(
     "auditoria",
     "Auditoria",
